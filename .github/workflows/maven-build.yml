@@ -44,6 +44,11 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven
 
+    - name: Setup config
+      run: |
+          mkdir -p src/main/resources
+          echo 'spring.datasource.url=jdbc:postgresql://postgres:5432/garang_guni' > src/main/resources/application-dev.properties
+    
     - name: Install dependencies
       run: mvn clean install -DskipTests
 
