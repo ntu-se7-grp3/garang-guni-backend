@@ -12,6 +12,21 @@ jobs:
         platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
 
+    services:
+        postgres:
+          image: postgres:16
+          env:
+            POSTGRES_USER: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+            POSTGRES_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+            POSTGRES_DB: garang_guni
+          options: >-
+            --health-cmd pg_isready
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 5
+          ports:
+            - 5432:5432
+            
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
