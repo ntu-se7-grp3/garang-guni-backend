@@ -9,6 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+      SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+
     steps:
       - name: Setup DB
         uses: harmon758/postgresql-action@v1
@@ -17,12 +21,6 @@ jobs:
           postgresql db: garang_guni
           postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          
-      - name: Setup config
-        run: |
-            mkdir -p src/main/resources
-            echo 'spring.datasource.username=${{ secrets.SPRING_DATASOURCE_USERNAME }}' > src/main/resources/application-dev.properties
-            echo 'spring.datasource.username=${{ secrets.SPRING_DATASOURCE_PASSWORD }}' > src/main/resources/application-dev.properties
       
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -49,15 +47,3 @@ jobs:
 
       - name: Run Tests
         run: mvn test
-
-      - name: Check Test Results
-        if: ${{ always() }}
-        run: |
-          echo "Checking for test failures"
-          TEST_RESULT=$(mvn surefire-report:report | grep "Tests run" | awk '{print $5}')
-          if [ "$TEST_RESULT" != "0" ]; then
-            echo "Some tests failed."
-            exit 1
-          else
-            echo "All tests passed."
-          fi
