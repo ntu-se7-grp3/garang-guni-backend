@@ -3,7 +3,7 @@ name: Java CI
 on: [push, pull_request]
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
   build:
@@ -12,60 +12,55 @@ jobs:
         platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
 
-    services:
-        postgres:
-          image: postgres:16
-          env:
-            POSTGRES_USER: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
-            POSTGRES_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-            POSTGRES_DB: garang_guni
-          options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
-          ports:
-            - 5432:5432
-            
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Setup DB
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: "16.4"
+          postgresql db: garang_guni
+          postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          
+      - name: Setup config
+        run: |
+            mkdir -p src/main/resources
+            echo 'spring.datasource.username=${{ secrets.SPRING_DATASOURCE_USERNAME }}' > src/main/resources/application-dev.properties
+            echo 'spring.datasource.username=${{ secrets.SPRING_DATASOURCE_PASSWORD }}' > src/main/resources/application-dev.properties
+      
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
-    - name: Cache Maven dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-maven
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
 
-    - name: Setup config
-      run: |
-          mkdir -p src/main/resources
-          echo 'spring.datasource.url=jdbc:postgresql://postgres:5432/garang_guni' > src/main/resources/application-dev.properties
-    
-    - name: Install dependencies
-      run: mvn clean install -DskipTests
+        
+      - name: Install dependencies
+        run: mvn clean install -DskipTests
 
-    - name: Run SpotBugs
-      run: mvn spotbugs:check
+      - name: Run SpotBugs
+        run: mvn spotbugs:check
 
-    - name: Run Tests
-      run: mvn test
+      - name: Run Tests
+        run: mvn test
 
-    - name: Check Test Results
-      if: ${{ always() }}
-      run: |
-        echo "Checking for test failures"
-        TEST_RESULT=$(mvn surefire-report:report | grep "Tests run" | awk '{print $5}')
-        if [ "$TEST_RESULT" != "0" ]; then
-          echo "Some tests failed."
-          exit 1
-        else
-          echo "All tests passed."
-        fi
+      - name: Check Test Results
+        if: ${{ always() }}
+        run: |
+          echo "Checking for test failures"
+          TEST_RESULT=$(mvn surefire-report:report | grep "Tests run" | awk '{print $5}')
+          if [ "$TEST_RESULT" != "0" ]; then
+            echo "Some tests failed."
+            exit 1
+          else
+            echo "All tests passed."
+          fi
