@@ -1,0 +1,188 @@
+package sg.edu.ntu.garang_guni_backend.services.impls;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.multipart.MultipartFile;
+import sg.edu.ntu.garang_guni_backend.entities.Image;
+import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageNotFoundException;
+import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageUnsupportedTypeException;
+import sg.edu.ntu.garang_guni_backend.repositories.ImageRepository;
+import sg.edu.ntu.garang_guni_backend.utils.ImageUtils;
+
+@SpringBootTest
+class ImageServiceImplTest {
+    @Mock
+    private ImageRepository imgRepository;
+
+    @InjectMocks
+    private ImageServiceImpl imgService;
+
+    @Mock
+    private MultipartFile file;
+
+    @Test
+    @DisplayName("Upload Image - Successful")
+    void uploadImageTest() throws Exception {
+        when(file.getOriginalFilename()).thenReturn("test_image.png");
+        when(file.getContentType()).thenReturn("image/png");
+        when(file.getBytes()).thenReturn("image_data".getBytes());
+
+        UUID imageId = UUID.randomUUID();
+        when(imgRepository.save(any(Image.class))).thenAnswer(invocation -> {
+            Image img = invocation.getArgument(0);
+            img.setImageId(imageId);
+            return img;
+        });
+
+        UUID savedImgUuid = imgService.uploadImage(file);
+        assertEquals(imageId, savedImgUuid, 
+                "The saved Image id should be the same as the new Image id");
+
+        verify(imgRepository, times(1)).save(any(Image.class));
+    }
+
+    @DisplayName("Upload Image - Invalid file")
+    @Test
+    void uploadInvalidFileTypeTest() {
+        assertThrows(ImageUnsupportedTypeException.class, () -> {
+            imgService.uploadImage(file);
+        });
+    }
+
+    @DisplayName("Get Image By Name - Successful")
+    @Test
+    void getImageByNameTest() throws Exception {
+        UUID id = UUID.randomUUID();
+        Image image = new Image();
+        image.setImageId(id);
+        image.setImageName("test_image.png");
+        image.setImageData(ImageUtils.compressImage("compressed_image_data".getBytes()));
+
+        when(imgRepository.findByImageName("test_image.png")).thenReturn(Optional.of(image));
+
+        byte[] result = imgService.getImageByName("test_image.png");
+
+        verify(imgRepository, times(1)).findByImageName("test_image.png");
+        assertArrayEquals("compressed_image_data".getBytes(), result);
+    }
+
+    @DisplayName("Get Image By Name - Invalid Id")
+    @Test
+    void getNonExistentImageByNameTest() {
+        when(imgRepository.findByImageName("test_image.png")).thenReturn(Optional.empty());
+
+        assertThrows(ImageNotFoundException.class, () -> {
+            imgService.getImageByName("test_image.png");
+        });
+    }
+
+    @DisplayName("Get Image By ID - Successful")
+    @Test
+    void getImageByIdTest() throws Exception {
+        UUID id = UUID.randomUUID();
+        Image image = new Image();
+        image.setImageId(id);
+        image.setImageData(ImageUtils.compressImage("compressed_image_data".getBytes()));
+
+        when(imgRepository.findById(id)).thenReturn(Optional.of(image));
+
+        byte[] result = imgService.getImageById(id);
+
+        verify(imgRepository, times(1)).findById(id);
+        assertArrayEquals("compressed_image_data".getBytes(), result);
+    }
+
+    @DisplayName("Get Image By ID - Invalid Id")
+    @Test
+    void getNonExistentImageByIdTest() {
+        UUID id = UUID.randomUUID();
+        when(imgRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ImageNotFoundException.class, () -> {
+            imgService.getImageById(id);
+        });
+    }
+
+    @DisplayName("Update Image - Successful")
+    @Test
+    void updateImageTest() throws Exception {
+        UUID id = UUID.randomUUID();
+        Image image = new Image();
+        image.setImageId(id);
+
+        when(imgRepository.findById(id)).thenReturn(Optional.of(image));
+        when(file.getOriginalFilename()).thenReturn("test_image.png");
+        when(file.getContentType()).thenReturn("image/png");
+        when(file.getBytes()).thenReturn("updated_image_data".getBytes());
+        when(imgRepository.save(any(Image.class))).thenAnswer(invocation -> {
+            Image img = invocation.getArgument(0);
+            img.setImageId(id);
+            return img;
+        });
+
+        UUID result = imgService.updateImage(id, file);
+
+        verify(imgRepository, times(1)).save(any(Image.class));
+        assertEquals(id, result);
+    }
+
+    @DisplayName("Update Image - Invalid file")
+    @Test
+    void updateImageUnsupportedTypeTest() {
+        UUID id = UUID.randomUUID();
+        assertThrows(ImageUnsupportedTypeException.class, () -> {
+            imgService.updateImage(id, file);
+        });
+    }
+
+    @DisplayName("Update Image - Invalid Id")
+    @Test
+    void updateNonExistentImageTest() {
+        UUID id = UUID.randomUUID();
+        when(imgRepository.findById(id)).thenReturn(Optional.empty());
+        when(file.getOriginalFilename()).thenReturn("test_image.png");
+
+        assertThrows(ImageNotFoundException.class, () -> {
+            imgService.updateImage(id, file);
+        });
+    }
+
+    @DisplayName("Delete Image - Successful")
+    @Test
+    void deleteImageTest() {
+        UUID id = UUID.randomUUID();
+        Image image = new Image();
+        image.setImageId(id);
+
+        when(imgRepository.findById(id)).thenReturn(Optional.of(image));
+
+        UUID result = imgService.deleteImage(id);
+
+        verify(imgRepository, times(1)).deleteById(id);
+        assertEquals(id, result);
+    }
+
+    @DisplayName("Delete Image - Invalid Id")
+    @Test
+    void deleteNonExistentImageTest() {
+        UUID id = UUID.randomUUID();
+        when(imgRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ImageNotFoundException.class, () -> {
+            imgService.deleteImage(id);
+        });
+    }
+}
