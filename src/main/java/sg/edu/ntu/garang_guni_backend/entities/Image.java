@@ -25,6 +25,17 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @Table(name = "Images")
 public class Image {
+
+    public Image(Image imageToBeClone) {
+        this(
+            imageToBeClone.getImageId(),
+            imageToBeClone.getImageName(),
+            imageToBeClone.getImageType(),
+            imageToBeClone.getCreatedAt(),
+            imageToBeClone.getUpdatedAt(),
+            imageToBeClone.getImageData());
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "imageId")
