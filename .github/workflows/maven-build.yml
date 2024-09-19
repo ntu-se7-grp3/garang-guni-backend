@@ -15,14 +15,13 @@ jobs:
 
     steps:
       - name: Setup main DB
-        uses: lolfoollor/postgresql-action@v1.1.0
+        uses: lolfoollor/postgresql-action@v1.1.1
         with:
           postgresql version: "16.4"
           postgresql db: main_db
           postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          postgresql host port: 5432
-          postgresql container port: 5432
+          HOST_PORT: 5432
 
       - name: Create additional databases
         run: |
