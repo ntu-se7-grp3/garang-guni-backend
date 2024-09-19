@@ -88,6 +88,7 @@ public class Item {
     }
 
     public void setImages(List<Image> updatedImages) {
-        this.images = (updatedImages != null) ? updatedImages.stream().map(Image::new).toList() : null;
+        this.images = (updatedImages != null) ?
+                updatedImages.stream().map(Image::new).toList() : null;
     }
 }
