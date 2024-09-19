@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Setup DB
-        uses: harmon758/postgresql-action@v1
+        uses: lolfoollor/postgresql-action@v1.1.1
         with:
           postgresql version: "16.4"
-          postgresql db: test_garang_guni
+          postgresql db: garang_guni
           postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
       
