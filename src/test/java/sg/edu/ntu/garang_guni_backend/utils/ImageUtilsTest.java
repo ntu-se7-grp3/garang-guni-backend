@@ -1,8 +1,8 @@
 package sg.edu.ntu.garang_guni_backend.utils;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +28,7 @@ class ImageUtilsTest {
 
     @DisplayName("isImage - Success")
     @Test
-    void IsImageTest() {
+    void isImageTest() {
         when(file.getOriginalFilename()).thenReturn("test_image.jpg");
         assertTrue(ImageUtils.isImage(file));
 
@@ -51,7 +51,7 @@ class ImageUtilsTest {
 
     @DisplayName("isImage - Non Existant File or File Name")
     @Test
-    void IsImageNonExistantFileOrFileNameTest() {
+    void isImageNonExistantFileOrFileNameTest() {
         assertFalse(ImageUtils.isImage(null));
 
         when(file.getOriginalFilename()).thenReturn(null);
@@ -60,7 +60,7 @@ class ImageUtilsTest {
 
     @DisplayName("isImage - Invalid Extension")
     @Test
-    void IsImageInvalidExtensionTest() {
+    void isImageInvalidExtensionTest() {
         when(file.getOriginalFilename()).thenReturn("test_image.apng");
         assertFalse(ImageUtils.isImage(file));
 
