@@ -21,12 +21,12 @@ jobs:
           postgresql db: main_db
           postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          HOST_PORT: 5432
+          HOST_PORT: 5433
 
       - name: Create additional databases
         run: |
-            docker exec -it $(docker ps -q -f "ancestor=postgres:16.4") psql -U ${{ secrets.SPRING_DATASOURCE_USERNAME }} -c "CREATE DATABASE garang_guni;"
-            docker exec -it $(docker ps -q -f "ancestor=postgres:16.4") psql -U ${{ secrets.SPRING_DATASOURCE_USERNAME }} -c "CREATE DATABASE test_garang_guni;"
+            docker exec $(docker ps -q -f "ancestor=postgres:16.4") psql -U ${{ secrets.SPRING_DATASOURCE_USERNAME }} -c "CREATE DATABASE garang_guni;"
+            docker exec $(docker ps -q -f "ancestor=postgres:16.4") psql -U ${{ secrets.SPRING_DATASOURCE_USERNAME }} -c "CREATE DATABASE test_garang_guni;"
       
       - name: Checkout repository
         uses: actions/checkout@v3
