@@ -11,12 +11,14 @@ import java.sql.Date;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Builder
 @AllArgsConstructor
@@ -43,4 +45,28 @@ public class Image {
     @Lob
     @Column(name = "imageData")
     private byte[] imageData;
+
+    public Date getCreatedAt() {
+        return (createdAt != null) ? new Date(createdAt.getTime()) : null;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = (createdAt != null) ? new Date(createdAt.getTime()) : null;
+    }
+
+    public Date getUpdatedAt() {
+        return (updatedAt != null) ? new Date(updatedAt.getTime()) : null;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = (updatedAt != null) ? new Date(updatedAt.getTime()) : null;
+    }
+
+    public byte[] getImageData() {
+        return (imageData != null) ? imageData.clone() : null;
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = (imageData != null) ? imageData.clone() : null;
+    }
 }
