@@ -21,7 +21,7 @@ jobs:
           postgresql db: main_db
           postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          HOST_PORT: 5433
+          HOST_PORT: 5432
 
       - name: Create additional databases
         run: |
