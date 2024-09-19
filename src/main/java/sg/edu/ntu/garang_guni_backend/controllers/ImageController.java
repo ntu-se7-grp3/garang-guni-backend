@@ -2,6 +2,7 @@ package sg.edu.ntu.garang_guni_backend.controllers;
 
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,8 @@ import sg.edu.ntu.garang_guni_backend.services.ImageService;
 @RestController
 @RequestMapping("/images")
 public class ImageController {
-    private ImageService imgService;
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
+    private final ImageService imgService;
 
     public ImageController(@Qualifier("imageServiceImpl") ImageService imgService) {
         this.imgService = imgService;
