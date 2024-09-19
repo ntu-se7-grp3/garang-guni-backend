@@ -15,14 +15,13 @@ jobs:
 
     steps:
       - name: Setup main DB
-        uses: lolfoollor/postgresql-action@v1.1.1
+        uses: Harmon758/postgresql-action@v1
         with:
           postgresql version: "16.4"
           postgresql db: main_db
           postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          HOST_PORT: 5432
-
+          
       - name: Create additional databases
         run: |
             docker exec $(docker ps -q -f "ancestor=postgres:16.4") psql -U ${{ secrets.SPRING_DATASOURCE_USERNAME }} -c "CREATE DATABASE garang_guni;"
