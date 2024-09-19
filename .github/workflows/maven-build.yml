@@ -14,21 +14,19 @@ jobs:
       SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
 
     steps:
-      - name: Setup DB
-        uses: harmon758/postgresql-action@v1
+      - name: Setup main DB
+        uses: lolfoollor/postgresql-action@v1.1.0
         with:
           postgresql version: "16.4"
-          postgresql db: garang_guni
+          postgresql db: main_db
           postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          postgresql host port: 5432 
 
-      - name: Setup Test DB
-        uses: harmon758/postgresql-action@v1
-        with:
-          postgresql version: "16.4"
-          postgresql db: test_garang_guni
-          postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
-          postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+      - name: Create additional databases
+        run: |
+            docker exec -it $(docker ps -q -f "ancestor=postgres:16.4") psql -U ${{ secrets.SPRING_DATASOURCE_USERNAME }} -c "CREATE DATABASE garang_guni;"
+            docker exec -it $(docker ps -q -f "ancestor=postgres:16.4") psql -U ${{ secrets.SPRING_DATASOURCE_USERNAME }} -c "CREATE DATABASE test_garang_guni;"
       
       - name: Checkout repository
         uses: actions/checkout@v3
