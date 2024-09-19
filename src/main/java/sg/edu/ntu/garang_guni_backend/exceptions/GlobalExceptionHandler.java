@@ -7,10 +7,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageUtilsException;
+import sg.edu.ntu.garang_guni_backend.exceptions.item.ItemNotFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(ImageNotFoundException.class)
+    @ExceptionHandler({ImageNotFoundException.class, ItemNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleResourceException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
