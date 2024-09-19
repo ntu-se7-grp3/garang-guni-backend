@@ -18,6 +18,14 @@ jobs:
         uses: harmon758/postgresql-action@v1
         with:
           postgresql version: "16.4"
+          postgresql db: garang_guni
+          postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+
+      - name: Setup Test DB
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: "16.4"
           postgresql db: test_garang_guni
           postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
