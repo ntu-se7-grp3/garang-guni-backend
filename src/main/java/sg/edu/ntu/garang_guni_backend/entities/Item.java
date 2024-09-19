@@ -1,15 +1,18 @@
 package sg.edu.ntu.garang_guni_backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import java.sql.Date;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,28 +28,32 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Images")
-public class Image {
+@Table(name = "Items")
+public class Item {
 
-    public Image(Image imageToBeClone) {
+    public Item(Item itemToBeClone) {
         this(
-            imageToBeClone.getImageId(),
-            imageToBeClone.getImageName(),
-            imageToBeClone.getImageType(),
-            imageToBeClone.getCreatedAt(),
-            imageToBeClone.getUpdatedAt(),
-            imageToBeClone.getImageData(),
-            imageToBeClone.getItem());
+            itemToBeClone.getItemId(),
+            itemToBeClone.getItemName(),
+            itemToBeClone.getItemDescription(),
+            itemToBeClone.getCreatedAt(),
+            itemToBeClone.getUpdatedAt(),
+            itemToBeClone.getImages()
+        );
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "imageId")
-    private UUID imageId;
+    @Column(name = "itemId")
+    private UUID itemId;
 
-    private String imageName;
+    @NotBlank(message = "Name for item is mandatory!")
+    @Column(name = "Name")
+    private String itemName;
 
-    private String imageType;
+    @NotBlank(message = "Description for item is mandatory!")
+    @Column(name = "Description")
+    private String itemDescription;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -56,13 +63,9 @@ public class Image {
     @UpdateTimestamp
     private Date updatedAt;
 
-    @Lob
-    @Column(name = "imageData")
-    private byte[] imageData;
-
-    @ManyToOne
-    @JoinColumn(name = "itemId", referencedColumnName = "itemId")
-    private Item item;
+    @JsonBackReference
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "item", cascade = CascadeType.ALL)
+    private List<Image> images;
 
     public Date getCreatedAt() {
         return (createdAt != null) ? new Date(createdAt.getTime()) : null;
@@ -80,11 +83,11 @@ public class Image {
         this.updatedAt = (updatedAt != null) ? new Date(updatedAt.getTime()) : null;
     }
 
-    public byte[] getImageData() {
-        return (imageData != null) ? imageData.clone() : null;
+    public List<Image> getImages() {
+        return (images != null) ? images.stream().map(Image::new).toList() : null;
     }
 
-    public void setImageData(byte[] imageData) {
-        this.imageData = (imageData != null) ? imageData.clone() : null;
+    public void setImages(List<Image> updatedImages) {
+        this.images = (updatedImages != null) ? updatedImages.stream().map(Image::new).toList() : null;
     }
 }
