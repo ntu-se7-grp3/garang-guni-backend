@@ -1,6 +1,7 @@
 package sg.edu.ntu.garang_guni_backend.controllers;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class ItemController {
     }
 
     @PostMapping({ "", "/" })
-    public ResponseEntity<Item> createItem(@RequestBody Item newItem) {
+    public ResponseEntity<Item> createItem(@Valid @RequestBody Item newItem) {
         return ResponseEntity.status(HttpStatus.CREATED).body(itemService.createItem(newItem));
     }
 
@@ -40,7 +41,7 @@ public class ItemController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Item> updateItem(@PathVariable UUID id, 
-                @RequestBody Item updatedItem) {
+            @Valid @RequestBody Item updatedItem) {
         Item selectedItem = itemService.updateItem(id, updatedItem);
         return ResponseEntity.status(HttpStatus.OK).body(selectedItem);
     }
