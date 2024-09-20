@@ -64,7 +64,7 @@ public class Item {
     private Date updatedAt;
 
     @JsonBackReference
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "item", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "item", cascade = CascadeType.ALL)
     private List<Image> images;
 
     public Date getCreatedAt() {
