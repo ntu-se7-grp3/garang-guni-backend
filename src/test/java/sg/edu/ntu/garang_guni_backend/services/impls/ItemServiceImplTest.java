@@ -141,7 +141,7 @@ class ItemServiceImplTest {
     void deleteItemTest() {
         when(itemRepository.findById(id)).thenReturn(Optional.of(sampleItem));
         
-        Item popItem = itemService.deleteImage(id);
+        Item popItem = itemService.deleteItem(id);
         assertEquals(popItem, sampleItem);
         verify(itemRepository, times(1)).findById(id);
         verify(itemRepository, times(1)).deleteById(id);
@@ -151,6 +151,6 @@ class ItemServiceImplTest {
     @Test
     void deleteItemWithNonExistentId() {
         when(itemRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(ItemNotFoundException.class, () -> itemService.deleteImage(id));
+        assertThrows(ItemNotFoundException.class, () -> itemService.deleteItem(id));
     }
 }

@@ -47,8 +47,8 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Item> deleteImage(@PathVariable UUID id) {
+    public ResponseEntity<Item> deleteItem(@PathVariable UUID id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                            .body(itemService.deleteImage(id));
+                            .body(itemService.deleteItem(id));
     }
 }

@@ -10,5 +10,5 @@ public interface ItemService {
 
     Item updateItem(UUID id, Item item);
     
-    Item deleteImage(UUID id);
+    Item deleteItem(UUID id);
 }

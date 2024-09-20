@@ -47,7 +47,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item deleteImage(UUID id) {
+    public Item deleteItem(UUID id) {
         Item itemToDelete = itemRepository.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException(id));
         itemRepository.deleteById(id);
