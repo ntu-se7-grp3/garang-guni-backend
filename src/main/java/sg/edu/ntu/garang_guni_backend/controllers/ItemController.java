@@ -2,6 +2,7 @@ package sg.edu.ntu.garang_guni_backend.controllers;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.services.ItemService;
 
@@ -50,5 +53,18 @@ public class ItemController {
     public ResponseEntity<Item> deleteItem(@PathVariable UUID id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                             .body(itemService.deleteItem(id));
+    }
+
+    @PostMapping({"/{id}/images", "/{id}/images/"})
+    public ResponseEntity<UUID> addImageToItem(
+            @PathVariable UUID id,
+            @RequestParam("image") MultipartFile newImage) {
+        UUID newImageId = itemService.addImageToItem(id, newImage);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newImageId);
+    }
+
+    @GetMapping("/{id}/images")
+    public ResponseEntity<List<String>> viewAllImages(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getAllImages(id));
     }
 }

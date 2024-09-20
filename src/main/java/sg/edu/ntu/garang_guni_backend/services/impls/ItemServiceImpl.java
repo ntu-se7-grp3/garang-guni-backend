@@ -1,19 +1,26 @@
 package sg.edu.ntu.garang_guni_backend.services.impls;
 
+import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import sg.edu.ntu.garang_guni_backend.entities.Image;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.exceptions.item.ItemNotFoundException;
 import sg.edu.ntu.garang_guni_backend.repositories.ItemRepository;
+import sg.edu.ntu.garang_guni_backend.services.ImageService;
 import sg.edu.ntu.garang_guni_backend.services.ItemService;
+import sg.edu.ntu.garang_guni_backend.utils.ImageUtils;
 
 @Service
 public class ItemServiceImpl implements ItemService {
 
     private ItemRepository itemRepository;
+    private ImageService imgService;
 
-    public ItemServiceImpl(ItemRepository itemRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, ImageService imgService) {
         this.itemRepository = itemRepository;
+        this.imgService = imgService;
     }
 
     @Override
@@ -53,5 +60,29 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.deleteById(id);
 
         return itemToDelete;
+    }
+
+    @Override
+    public UUID addImageToItem(UUID id, MultipartFile file) {
+        Item selectedItem = itemRepository
+                .findById(id)
+                .orElseThrow(() -> new ItemNotFoundException(id));
+        return imgService.uploadImageAndAssignItemId(selectedItem, file);
+    }
+
+    @Override
+    public List<String> getAllImages(UUID id) {
+        Item selectedItem = itemRepository
+                .findById(id)
+                .orElseThrow(() -> new ItemNotFoundException(id));
+
+        return (!selectedItem.getImages().isEmpty())
+            ? selectedItem.getImages()
+                            .stream()
+                            .map(Image::getImageId)
+                            .map(imgId -> imgService.getImageById(imgId))
+                            .map(ImageUtils::convertBytesArrToBase64)
+                            .toList()
+            : null;
     }
 }
