@@ -7,6 +7,7 @@ import java.util.zip.DataFormatException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sg.edu.ntu.garang_guni_backend.entities.Image;
+import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageCompressionException;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageDecompressionException;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageErrorCode;
@@ -26,20 +27,35 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public UUID uploadImage(MultipartFile file) {
+        Image buildImg = buildImageFromFile(file);
+        imgRepository.save(buildImg);
+
+        return buildImg.getImageId();
+    }
+
+    @Override
+    public UUID uploadImageAndAssignItemId(Item item, MultipartFile file) {
+        Image buildImg = buildImageFromFile(file);
+        buildImg.setItem(item);
+        imgRepository.save(buildImg);
+        
+        return buildImg.getImageId();
+    }
+
+    public Image buildImageFromFile(MultipartFile file) {
         boolean isImage = ImageUtils.isImage(file);
         if (!isImage) {
             throw new ImageUnsupportedTypeException(
                 ImageErrorCode.INVALID_IMAGE_EXTENSION, file);
         }
-        
+
         try {
-            Image image = Image.builder()
+            return Image.builder()
                     .imageName(file.getOriginalFilename())
                     .imageType(file.getContentType())
                     .imageData(ImageUtils.compressImage(file.getBytes()))
                     .build();
-            imgRepository.save(image);
-            return image.getImageId();
+
         } catch (IOException ioException) {
             ImageErrorCode errorMsgCode;
             if (ioException.getMessage().contains("Disk full")) {
