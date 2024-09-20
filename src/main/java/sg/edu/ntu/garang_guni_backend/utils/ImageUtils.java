@@ -2,6 +2,7 @@ package sg.edu.ntu.garang_guni_backend.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -63,5 +64,9 @@ public class ImageUtils {
 
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
         return VALID_EXTENSIONS.contains(extension);
+    }
+
+    public static String convertBytesArrToBase64(byte[] imgData) {
+        return Base64.getEncoder().encodeToString(imgData);
     }
 }

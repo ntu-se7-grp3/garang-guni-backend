@@ -1,6 +1,7 @@
 package sg.edu.ntu.garang_guni_backend.utils;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -67,4 +68,13 @@ class ImageUtilsTest {
         when(file.getOriginalFilename()).thenReturn("test_image");
         assertFalse(ImageUtils.isImage(file));
     } 
+
+    @DisplayName("Convert Bytes[] To Base64")
+    @Test
+    void convertBytesArrToBase64Test() {
+        byte[] sampleData = "This is a picture".getBytes();
+        String result = ImageUtils.convertBytesArrToBase64(sampleData);
+        String expectedStr = "VGhpcyBpcyBhIHBpY3R1cmU=";
+        assertEquals(result, expectedStr, "The encoding must be the same");
+    }
 }
