@@ -1,5 +1,6 @@
 package sg.edu.ntu.garang_guni_backend.services.impls;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import sg.edu.ntu.garang_guni_backend.utils.ImageUtils;
 public class ItemServiceImpl implements ItemService {
 
     private ItemRepository itemRepository;
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     private ImageService imgService;
 
     public ItemServiceImpl(ItemRepository itemRepository, ImageService imgService) {
