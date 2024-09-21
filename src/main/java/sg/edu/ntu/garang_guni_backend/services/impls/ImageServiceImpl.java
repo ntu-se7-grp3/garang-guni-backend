@@ -156,4 +156,12 @@ public class ImageServiceImpl implements ImageService {
         imgRepository.deleteById(id);
         return imageToDelete.getImageId();
     }
+
+    public boolean isLinked(String imgId, String itemId) {
+        UUID imgUuid = UUID.fromString(imgId);
+        Image retrievedImg = imgRepository.findById(imgUuid).orElse(null);
+        Item connectedItem = retrievedImg.getItem();
+        String connectedItemId = connectedItem.getItemId().toString();
+        return connectedItemId.equals(itemId);
+    }
 }

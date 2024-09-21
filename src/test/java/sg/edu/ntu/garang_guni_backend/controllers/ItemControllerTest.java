@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.exceptions.item.ItemNotFoundException;
+import sg.edu.ntu.garang_guni_backend.services.impls.ImageServiceImpl;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,6 +32,9 @@ class ItemControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ImageServiceImpl imgService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -352,5 +357,50 @@ class ItemControllerTest {
                 .andExpect(result -> 
                     assertTrue(result.getResolvedException() 
                         instanceof ItemNotFoundException));
+    }
+
+    @DisplayName("Add Image To Item - Successful")
+    @Test
+    void addImageToItemtest() throws Exception {
+        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
+
+        RequestBuilder createItemRequest = MockMvcRequestBuilders.post("/items")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(sampleItemAsJson);
+        
+        String createdItemAsJson = mockMvc.perform(createItemRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.itemId").exists())
+                .andExpect(jsonPath("$.itemName")
+                            .value("Aluminium Cans"))
+                .andExpect(jsonPath("$.itemDescription")
+                            .value("It's a metal can."))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        
+        String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");  
+
+        MockMultipartFile imageToAdd = new MockMultipartFile("image",
+                "image_to_add.png", 
+                "image/png",
+                "This is a test image".getBytes());
+        
+        RequestBuilder postRequest = MockMvcRequestBuilders
+                .multipart("/items/" + createdItemId + "/images")
+                .file(imageToAdd);
+                
+        String unFormattedImgId = mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Get Content As String -> gives extra ""
+        String imgId = unFormattedImgId.replaceAll("^\"|\"$", "");
+
+        assertTrue(imgService.isLinked(imgId, createdItemId));
     }
 }
