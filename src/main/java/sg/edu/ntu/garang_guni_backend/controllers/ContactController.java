@@ -1,7 +1,6 @@
 package sg.edu.ntu.garang_guni_backend.controllers;
 
 import java.util.List;
-import java.util.UUID;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +21,21 @@ public class ContactController {
     @Autowired
     private ContactService contactService;
 
+    // create contact form
     @PostMapping({ "", "/" })
     public ResponseEntity<Contact> createContact(@Valid @RequestBody Contact contact) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(contactService.createContact(contact));
+        Contact savedContact = contactService.createContact(contact);
+        return new ResponseEntity<>(savedContact, HttpStatus.CREATED);
     }
 
+    // read all contact form
     @GetMapping({ "", "/" })
     public ResponseEntity<List<Contact>> getAllContacts() {
-        List<Contact> contacts = contactService.getAllContacts();
-        return ResponseEntity.status(HttpStatus.OK).body(contacts);
+        List<Contact> allContacts = contactService.getAllContacts();
+        return ResponseEntity.status(HttpStatus.OK).body(allContacts);
     }
 
+    // testing
     @GetMapping("/testtest")
     public String test() {
         return "Controller is working";

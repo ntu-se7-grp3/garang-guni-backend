@@ -2,6 +2,8 @@ package sg.edu.ntu.garang_guni_backend.exceptions;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
@@ -12,26 +14,42 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handle ContactNotFoundException & ContactProcessingException
-    @ExceptionHandler({ ContactNotFoundException.class, ContactProcessingException.class })
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(RuntimeException ex) {
+    private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    // Handle ContactNotFoundException
+    @ExceptionHandler(ContactNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleContactNotFoundException(ContactNotFoundException ex) {
+        logger.error("Error: ", ex);
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND); // 404
     }
 
-    // Validate Exception Handler
+    // Handle ContactNotProcessingException
+    @ExceptionHandler(ContactNotProcessingException.class)
+    public ResponseEntity<ErrorResponse> handleContactNotProcessingException(ContactNotProcessingException ex) {
+        logger.error("Error: ", ex);
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500
+    }
+
+    // Handle validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        logger.warn("Validation failed: {}", ex.getMessage());
         List<ObjectError> validationErrors = ex.getBindingResult().getAllErrors();
         StringBuilder sb = new StringBuilder();
-
         for (ObjectError error : validationErrors) {
             sb.append(error.getDefaultMessage()).append(". ");
         }
-
         ErrorResponse errorResponse = new ErrorResponse(sb.toString(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
     }
 
+    // Handle generic exceptions
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+        logger.error("Unexpected Error: ", ex);
+        ErrorResponse errorResponse = new ErrorResponse("Unexpected error occurred, please debug", LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500
+    }
 }
