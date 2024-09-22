@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,38 +20,49 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import sg.edu.ntu.garang_guni_backend.entities.Image;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.exceptions.item.ItemNotFoundException;
 import sg.edu.ntu.garang_guni_backend.repositories.ItemRepository;
+import sg.edu.ntu.garang_guni_backend.services.ImageService;
 
 @SpringBootTest
 class ItemServiceImplTest {
     @Mock
     private ItemRepository itemRepository;
 
+    @Mock
+    private ImageService imgService;
+
     @InjectMocks
     private ItemServiceImpl itemService;
     private static Item sampleItem;
     private static Item updatedItem;
-    private static UUID id;
+    private static UUID itemId;
+    private static MultipartFile imgFile;
+    private static Image steelCanImage;
+    private static Image steelCanSideImage;
+    private static final String BASE_64_STEEL_CAN_IMG
+            = "VGhpcyBpcyBhIFN0ZWVsIGNhbiBpbWFnZQ==";
 
     @BeforeAll
     static void setup() {
-        id = UUID.randomUUID();
+        itemId = UUID.randomUUID();
 
         sampleItem = Item.builder()
                 .itemName("Aluminium Cans")
                 .itemDescription("It's a metal can.")
                 .build();
         
-        Image steelCanImage = Image.builder()
+        steelCanImage = Image.builder()
                         .imageName("Steel Can Photo")
                         .imageType("image/png")
                         .imageData("This is a Steel can image".getBytes())
                         .build();
 
-        Image steelCanSideImage = Image.builder()
+        steelCanSideImage = Image.builder()
                         .imageName("Steel Can Side Photo")
                         .imageType("image/png")
                         .imageData("This is a Steel can side image".getBytes())
@@ -60,6 +73,11 @@ class ItemServiceImplTest {
                 .itemDescription("It's STILL a metal can.")
                 .images(List.of(steelCanImage, steelCanSideImage))
                 .build();
+
+        imgFile = new MockMultipartFile("image",
+                "test_image.png", 
+                "image/png",
+                "This is a test image".getBytes());
     }
     
     @DisplayName("Create Item - Successful")
@@ -80,35 +98,35 @@ class ItemServiceImplTest {
     @DisplayName("Get Item By Id - Successful")
     @Test
     void getItemByIdTest() {
-        when(itemRepository.findById(id)).thenReturn(Optional.of(sampleItem));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(sampleItem));
 
-        Item retrievedItem = itemService.getItemById(id);
+        Item retrievedItem = itemService.getItemById(itemId);
         assertEquals(sampleItem.getItemName(), retrievedItem.getItemName(),
             "The name of retrieved Item should be the same as original!");
         assertEquals(sampleItem.getItemDescription(), retrievedItem.getItemDescription(),
             "The description of retrieved Item should be the same as original!");
-        verify(itemRepository, times(1)).findById(id);
+        verify(itemRepository, times(1)).findById(itemId);
     }
 
     @DisplayName("Get Item By Id - Invalid Id")
     @Test
     void getItemByIdWithNonExistentIdTest() {
-        when(itemRepository.findById(id)).thenReturn(Optional.empty());
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
 
         assertThrows(ItemNotFoundException.class, 
-            () -> itemService.getItemById(id));
+            () -> itemService.getItemById(itemId));
     }
 
     @DisplayName("Update Item - Successful")
     @Test
     void updateItemTest() {
-        when(itemRepository.findById(id)).thenReturn(Optional.of(sampleItem));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(sampleItem));
         when(itemRepository.save(any(Item.class)))
                             .thenAnswer(invocation ->  {
                                 return invocation.getArgument(0);
                             });
 
-        Item retrievedUpdatedItem = itemService.updateItem(id, updatedItem);
+        Item retrievedUpdatedItem = itemService.updateItem(itemId, updatedItem);
         
         assertNotEquals(updatedItem, retrievedUpdatedItem, 
             "The saved Item should NOT be the same as the updated Item!");
@@ -125,7 +143,7 @@ class ItemServiceImplTest {
         assertArrayEquals(updatedItem.getImages().get(0).getImageData(),
                 retrievedUpdatedItem.getImages().get(0).getImageData(),
             "The data of saved Item should be same as updated Item!");
-        verify(itemRepository, times(1)).findById(id);
+        verify(itemRepository, times(1)).findById(itemId);
         verify(itemRepository, times(1)).save(any(Item.class));
     }
 
@@ -133,24 +151,78 @@ class ItemServiceImplTest {
     @Test
     void updateItemWithNonExistentId() {
         assertThrows(ItemNotFoundException.class,
-            () -> itemService.updateItem(id, updatedItem));
+            () -> itemService.updateItem(itemId, updatedItem));
     }
 
     @DisplayName("Delete Item - Successful")
     @Test
     void deleteItemTest() {
-        when(itemRepository.findById(id)).thenReturn(Optional.of(sampleItem));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(sampleItem));
         
-        Item popItem = itemService.deleteItem(id);
+        Item popItem = itemService.deleteItem(itemId);
         assertEquals(popItem, sampleItem);
-        verify(itemRepository, times(1)).findById(id);
-        verify(itemRepository, times(1)).deleteById(id);
+        verify(itemRepository, times(1)).findById(itemId);
+        verify(itemRepository, times(1)).deleteById(itemId);
     }
 
     @DisplayName("Delete Item - Invalid Id")
     @Test
     void deleteItemWithNonExistentId() {
-        when(itemRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(ItemNotFoundException.class, () -> itemService.deleteItem(id));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+        assertThrows(ItemNotFoundException.class, () -> itemService.deleteItem(itemId));
+    }
+
+    @DisplayName("Add Image to Item - Successful")
+    @Test
+    void addImageToItemTest() {
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(sampleItem));
+        UUID uploadedImgId = UUID.randomUUID();
+        when(imgService.uploadImageAndAssignItemId(sampleItem, imgFile))
+                .thenReturn(uploadedImgId);
+
+        UUID result = itemService.addImageToItem(itemId, imgFile);
+
+        assertEquals(uploadedImgId, result, 
+                "The returned ID should match the generated image ID");
+        verify(itemRepository, times(1))
+                .findById(itemId);
+        verify(imgService, times(1))
+                .uploadImageAndAssignItemId(sampleItem, imgFile);
+    }
+
+    @DisplayName("Add Image to Item - Invalid Id")
+    @Test
+    void addImageToNonExistantItemTest() {
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+        assertThrows(ItemNotFoundException.class, 
+                () -> itemService.addImageToItem(itemId, imgFile));
+    }
+
+    @DisplayName("Get All Images - Successful")
+    @Test
+    void getAllImagesTest() {
+        UUID imgId = UUID.randomUUID();
+        Item updatedItemMock = mock(Item.class);
+        Image steelCanImageMock = mock(Image.class);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(updatedItemMock));
+        when(updatedItemMock.getImages())
+            .thenReturn(List.of(steelCanImageMock));
+        when(steelCanImageMock.getImageId())
+            .thenReturn(imgId);
+        when(imgService.getImageById(any(UUID.class)))
+            .thenReturn(steelCanImage.getImageData());
+
+        List<String> images = itemService.getAllImages(itemId);
+        assertEquals(1, images.size());
+        assertTrue(images.stream().anyMatch(image -> 
+                image.equals(BASE_64_STEEL_CAN_IMG)));
+    }
+    
+    @DisplayName("Get All Images - Invalid Id")
+    @Test
+    void getAllImagesFromNonExistantItemTest() {
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+        assertThrows(ItemNotFoundException.class, 
+                () -> itemService.getAllImages(itemId));
     }
 }
