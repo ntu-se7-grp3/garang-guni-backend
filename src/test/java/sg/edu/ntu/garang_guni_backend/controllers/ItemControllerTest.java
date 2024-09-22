@@ -47,6 +47,10 @@ class ItemControllerTest {
     private static Item itemWithoutName;
     private static Item itemWithoutDescription;
     private static Item itemWithNothing;
+    private static MockMultipartFile imageToAdd;
+    private static MockMultipartFile imageToAdd2;
+    private static String base64ImgToAddData;
+    private static String base64ImgToAdd2Data;
     
     @BeforeAll
     static void setUp() {
@@ -69,88 +73,39 @@ class ItemControllerTest {
                 .build();
 
         itemWithNothing = new Item();
+
+        imageToAdd = new MockMultipartFile("image",
+                "image_to_add.png", 
+                "image/png",
+                "This is a test image".getBytes());
+
+        imageToAdd2 = new MockMultipartFile("image",
+                "image_to_add2.png", 
+                "image/png",
+                "This is a test image 2".getBytes());
+
+        base64ImgToAddData = "VGhpcyBpcyBhIHRlc3QgaW1hZ2U=";
+        base64ImgToAdd2Data = "VGhpcyBpcyBhIHRlc3QgaW1hZ2UgMg==";
     }
 
     @DisplayName("Create Item - Successful")
     @Test
     void createItemTest() throws Exception {
-        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
-
-        RequestBuilder request = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
-        
-        mockMvc.perform(request)
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.itemId").exists())
-                .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
-                .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."));       
+        postVerifyAndRetrieveSampleItemResponse();       
     }
 
     @DisplayName("Create Item - Missing Parameters")
     @Test
     void createItemWithMissingParametersTest() throws Exception {
-        String newItemWithoutNameAsJson = objectMapper
-                .writeValueAsString(itemWithoutName);
-        String newItemWithoutDescriptionAsJson = objectMapper
-                .writeValueAsString(itemWithoutDescription);
-        String newItemWithNothingAsJson = objectMapper
-                .writeValueAsString(itemWithNothing);
-        
-        RequestBuilder requestWithNoName = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(newItemWithoutNameAsJson);
-        RequestBuilder requestWithNoDescription = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(newItemWithoutDescriptionAsJson);
-        RequestBuilder requestWithNothing = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(newItemWithNothingAsJson);
-        
-        mockMvc.perform(requestWithNoName)
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(result -> 
-                    assertTrue(result.getResolvedException() 
-                        instanceof MethodArgumentNotValidException));
-        mockMvc.perform(requestWithNoDescription)
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(result -> 
-                    assertTrue(result.getResolvedException() 
-                        instanceof MethodArgumentNotValidException));
-        mockMvc.perform(requestWithNothing)
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(result -> 
-                    assertTrue(result.getResolvedException() 
-                        instanceof MethodArgumentNotValidException));
+        postAndVerifyBadRequest(itemWithoutName);
+        postAndVerifyBadRequest(itemWithoutDescription);
+        postAndVerifyBadRequest(itemWithNothing);
     }
 
     @DisplayName("Get Item By Id - Sucessful")
     @Test
     void getItemByIdTest() throws Exception {
-        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
-
-        RequestBuilder createRequest = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
-                
-        String createdItemAsJson = mockMvc.perform(createRequest)
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.itemId").exists())
-                .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
-                .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse(); 
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");
 
         RequestBuilder getRequest = MockMvcRequestBuilders
@@ -186,24 +141,7 @@ class ItemControllerTest {
     @DisplayName("Update Item - Successful")
     @Test
     void updateItemTest() throws Exception {
-        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
-
-        RequestBuilder createRequest = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
-                
-        String createdItemAsJson = mockMvc.perform(createRequest)
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.itemId").exists())
-                .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
-                .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");
 
         String updatedItemAsJson = objectMapper.writeValueAsString(updatedItem);
@@ -247,87 +185,18 @@ class ItemControllerTest {
     @DisplayName("Update Item - Invalid Item")
     @Test
     void updateItemWithInvalidItemTest() throws Exception {
-        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
-
-        RequestBuilder createRequest = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
-                
-        String createdItemAsJson = mockMvc.perform(createRequest)
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.itemId").exists())
-                .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
-                .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");
 
-        String updatedItemWithoutNameAsJson = objectMapper
-                .writeValueAsString(itemWithoutName);
-        String updatedItemWithoutDescriptionAsJson = objectMapper
-                .writeValueAsString(itemWithoutDescription);
-        String updatedItemWithNothingAsJson = objectMapper
-                .writeValueAsString(itemWithNothing);
-
-        RequestBuilder putRequestWithNamelessItem = MockMvcRequestBuilders
-                .put("/items/" + createdItemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(updatedItemWithoutNameAsJson);
-        RequestBuilder putRequestWithDescriptionlessItem = MockMvcRequestBuilders
-                .put("/items/" + createdItemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(updatedItemWithoutDescriptionAsJson);
-        RequestBuilder putRequestWithBlankItem = MockMvcRequestBuilders
-                .put("/items/" + createdItemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(updatedItemWithNothingAsJson);
-
-        mockMvc.perform(putRequestWithNamelessItem)
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(result -> 
-                    assertTrue(result.getResolvedException() 
-                        instanceof MethodArgumentNotValidException));
-        mockMvc.perform(putRequestWithDescriptionlessItem)
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(result -> 
-                    assertTrue(result.getResolvedException() 
-                        instanceof MethodArgumentNotValidException));
-        mockMvc.perform(putRequestWithBlankItem)
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(result -> 
-                    assertTrue(result.getResolvedException() 
-                        instanceof MethodArgumentNotValidException));
+        putAndVerifyBadRequest(itemWithoutName, createdItemId);
+        putAndVerifyBadRequest(itemWithoutDescription, createdItemId);
+        putAndVerifyBadRequest(itemWithNothing, createdItemId);
     }
 
     @DisplayName("Delete Item - Successful")
     @Test
     void deleteItemTest() throws Exception {
-        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
-
-        RequestBuilder createRequest = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
-                
-        String createdItemAsJson = mockMvc.perform(createRequest)
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.itemId").exists())
-                .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
-                .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");
 
         RequestBuilder deleteRequest = MockMvcRequestBuilders
@@ -366,30 +235,8 @@ class ItemControllerTest {
     @DisplayName("Add Image To Item - Successful")
     @Test
     void addImageToItemtest() throws Exception {
-        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
-
-        RequestBuilder createItemRequest = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
-        
-        String createdItemAsJson = mockMvc.perform(createItemRequest)
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.itemId").exists())
-                .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
-                .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");  
-
-        MockMultipartFile imageToAdd = new MockMultipartFile("image",
-                "image_to_add.png", 
-                "image/png",
-                "This is a test image".getBytes());
         
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
@@ -413,11 +260,6 @@ class ItemControllerTest {
     void addImageToNonExistantItemtest() throws Exception {
         UUID invalidId = UUID.randomUUID();
 
-        MockMultipartFile imageToAdd = new MockMultipartFile("image",
-                "image_to_add.png", 
-                "image/png",
-                "This is a test image".getBytes());
-        
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + invalidId + "/images")
                 .file(imageToAdd);
@@ -433,34 +275,17 @@ class ItemControllerTest {
     @DisplayName("Add Image To Item - Invalid File type")
     @Test
     void addTextFileToItemtest() throws Exception {
-        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
-
-        RequestBuilder createItemRequest = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
-        
-        String createdItemAsJson = mockMvc.perform(createItemRequest)
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.itemId").exists())
-                .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
-                .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");  
 
-        MockMultipartFile imageToAdd = new MockMultipartFile("image",
+        MockMultipartFile invalidImage = new MockMultipartFile("image",
                 "text_to_add.txt", 
                 "text/plain",
                 "This is a text file".getBytes());
         
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
-                .file(imageToAdd);
+                .file(invalidImage);
                 
         mockMvc.perform(postRequest)
                 .andExpect(status().isBadRequest())
@@ -473,36 +298,9 @@ class ItemControllerTest {
     @DisplayName("View All Images - Successful")
     @Test
     void viewAllImagesTest() throws Exception {
-        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
-
-        RequestBuilder createItemRequest = MockMvcRequestBuilders.post("/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
-        
-        String createdItemAsJson = mockMvc.perform(createItemRequest)
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.itemId").exists())
-                .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
-                .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");  
 
-        MockMultipartFile imageToAdd = new MockMultipartFile("image",
-                "image_to_add.png", 
-                "image/png",
-                "This is a test image".getBytes());
-        
-        MockMultipartFile imageToAdd2 = new MockMultipartFile("image",
-                "image_to_add2.png", 
-                "image/png",
-                "This is a test image 2".getBytes());
-        
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
                 .file(imageToAdd);
@@ -550,9 +348,9 @@ class ItemControllerTest {
         
         assertEquals(2, images.size());
         assertTrue(images.stream().anyMatch(image -> 
-                image.equals("VGhpcyBpcyBhIHRlc3QgaW1hZ2U=")));
+                image.equals(base64ImgToAddData)));
         assertTrue(images.stream().anyMatch(image -> 
-                image.equals("VGhpcyBpcyBhIHRlc3QgaW1hZ2UgMg==")));
+                image.equals(base64ImgToAdd2Data)));
     }
 
     @DisplayName("View All Images - Invalid Id")
@@ -568,5 +366,56 @@ class ItemControllerTest {
                 .andExpect(result -> 
                     assertTrue(result.getResolvedException() 
                         instanceof ItemNotFoundException));
+    }
+
+    private String postVerifyAndRetrieveSampleItemResponse() throws Exception {
+        String sampleItemAsJson = objectMapper.writeValueAsString(sampleItem);
+
+        RequestBuilder postRequest = MockMvcRequestBuilders.post("/items")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(sampleItemAsJson);
+        
+        return mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.itemId").exists())
+                .andExpect(jsonPath("$.itemName")
+                            .value("Aluminium Cans"))
+                .andExpect(jsonPath("$.itemDescription")
+                            .value("It's a metal can."))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+    }
+
+    private void postAndVerifyBadRequest(Item malformItem) throws Exception {
+        String newMalformItemAsJson = objectMapper.writeValueAsString(malformItem);
+        
+        RequestBuilder postRequest = MockMvcRequestBuilders.post("/items")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(newMalformItemAsJson);
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof MethodArgumentNotValidException));
+    }
+
+    private void putAndVerifyBadRequest(Item malformItem, String id) throws Exception {
+        String newMalformItemAsJson = objectMapper.writeValueAsString(malformItem);
+        
+        RequestBuilder putRequest = MockMvcRequestBuilders
+                .put("/items/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(newMalformItemAsJson);
+
+        mockMvc.perform(putRequest)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof MethodArgumentNotValidException));
     }
 }
