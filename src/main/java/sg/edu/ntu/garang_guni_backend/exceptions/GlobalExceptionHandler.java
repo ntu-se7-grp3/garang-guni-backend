@@ -18,7 +18,8 @@ public class GlobalExceptionHandler {
 
     // Handle ContactNotFoundException
     @ExceptionHandler(ContactNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleContactNotFoundException(ContactNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleContactNotFoundException(
+        ContactNotFoundException ex) {
         logger.error("Error: ", ex);
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND); // 404
@@ -26,7 +27,8 @@ public class GlobalExceptionHandler {
 
     // Handle ContactNotProcessingException
     @ExceptionHandler(ContactNotProcessingException.class)
-    public ResponseEntity<ErrorResponse> handleContactNotProcessingException(ContactNotProcessingException ex) {
+    public ResponseEntity<ErrorResponse> handleContactNotProcessingException(
+            ContactNotProcessingException ex) {
         logger.error("Error: ", ex);
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500
@@ -34,7 +36,8 @@ public class GlobalExceptionHandler {
 
     // Handle validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(
+        MethodArgumentNotValidException ex) {
         logger.warn("Validation failed: {}", ex.getMessage());
         List<ObjectError> validationErrors = ex.getBindingResult().getAllErrors();
         StringBuilder sb = new StringBuilder();
@@ -49,7 +52,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         logger.error("Unexpected Error: ", ex);
-        ErrorResponse errorResponse = new ErrorResponse("Unexpected error occurred, please debug", LocalDateTime.now());
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Unexpected error occurred, please debug", LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500
     }
 }
