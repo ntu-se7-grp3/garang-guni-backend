@@ -13,7 +13,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import sg.edu.ntu.garang_guni_backend.entities.Contact;
-import sg.edu.ntu.garang_guni_backend.repositories.ContactRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -25,8 +24,6 @@ public class ContactControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private ContactRepository contactRepository;
 
     @DisplayName("Test for creating a valid contact form")
     @Test
