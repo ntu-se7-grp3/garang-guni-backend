@@ -7,42 +7,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import sg.edu.ntu.garang_guni_backend.controllers.ContactController;
 import sg.edu.ntu.garang_guni_backend.entities.Contact;
-import sg.edu.ntu.garang_guni_backend.service.ContactService;
+import sg.edu.ntu.garang_guni_backend.services.ContactService;
 
-@WebMvcTest(ContactController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class GlobalExceptionHandlerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    // Mocking the ContactService
     @MockBean
     private ContactService contactService;
-
-    @InjectMocks
-    private GlobalExceptionHandler globalExceptionHandler;
 
     @Test
     @DisplayName("Test for handling ContactNotProcessingException")
     public void testHandleContactNotProcessingException() throws Exception {
-        // Mock service to throw ContactNotProcessingException
-        doThrow(new ContactNotProcessingException("Processing error")).when(contactService)
-                .createContact(any(Contact.class));
+        // Mock the service to throw ContactNotProcessingException
+        doThrow(new ContactNotProcessingException("Processing error"))
+                .when(contactService).createContact(any(Contact.class));
 
-        // Perform a POST request and expect 500 Internal Server Error
+        // Perform a POST request to trigger the exception and expect a 500 Internal Server Error
         mockMvc.perform(MockMvcRequestBuilders.post("/contacts")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                        "{ \"firstName\": \"Wang\", \"email\": \"wang@gmail.com\", \"phoneNumber\": \"1234567890\", \"subject\": \"Test\", \"messageContent\": \"This is a test message.\" }"))
+                .content("{ \"firstName\": \"Wang\", \"email\": \"wang@gmail.com\","
+                + " \"phoneNumber\": \"+6598765432\", \"subject\": \"Test\","
+                + " \"messageContent\": \"This is a test message.\" }"))
                 .andExpect(status().isInternalServerError()) // Expect 500 error
                 .andExpect(jsonPath("$.message").value("Processing error"));
     }
@@ -50,16 +48,19 @@ public class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Test for handling generic exceptions")
     public void testHandleGenericException() throws Exception {
-        // Force a RuntimeException to trigger the generic exception handler
-        doThrow(new RuntimeException("Unexpected error")).when(contactService).createContact(any(Contact.class));
+        // Mock the service to throw a RuntimeException to trigger the generic exception handler
+        doThrow(new RuntimeException("Unexpected error"))
+                .when(contactService).createContact(any(Contact.class));
 
-        // Perform a POST request and expect 500 Internal Server Error
+        // Perform a POST request to trigger the exception and expect a 500 Internal Server Error
         mockMvc.perform(MockMvcRequestBuilders.post("/contacts")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                        "{ \"firstName\": \"Wang\", \"email\": \"wang@gmail.com\", \"phoneNumber\": \"1234567890\", \"subject\": \"Test\", \"messageContent\": \"This is a test message.\" }"))
+                .content("{ \"firstName\": \"Wang\", \"email\": \"wang@gmail.com\","
+                + " \"phoneNumber\": \"+6598765432\", \"subject\": \"Test\","
+                + " \"messageContent\": \"This is a test message.\" }"))
                 .andExpect(status().isInternalServerError()) // Expect 500 error
-                .andExpect(jsonPath("$.message").value("Unexpected error occurred, please debug"));
+                .andExpect(jsonPath("$.message").value(
+                        "Unexpected error occurred, please debug"));
     }
 }
 
