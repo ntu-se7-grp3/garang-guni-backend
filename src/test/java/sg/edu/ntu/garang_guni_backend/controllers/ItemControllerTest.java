@@ -42,6 +42,10 @@ class ItemControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+    private static final String SAMPLE_ITEM_NAME = "Aluminium Cans";
+    private static final String SAMPLE_ITEM_DESCRIPTION = "It's a metal can.";
+    private static final String UPDATED_ITEM_NAME = "Steel Cans";
+    private static final String UPDATED_ITEM_DESCRIPTON = "It's STILL a metal can.";
     private static Item sampleItem;
     private static Item updatedItem;
     private static Item itemWithoutName;
@@ -55,21 +59,21 @@ class ItemControllerTest {
     @BeforeAll
     static void setUp() {
         sampleItem = Item.builder()
-                .itemName("Aluminium Cans")
-                .itemDescription("It's a metal can.")
+                .itemName(SAMPLE_ITEM_NAME)
+                .itemDescription(SAMPLE_ITEM_DESCRIPTION)
                 .build();
         
         updatedItem = Item.builder()
-                .itemName("Steel Cans")
-                .itemDescription("It's STILL a metal can.")
+                .itemName(UPDATED_ITEM_NAME)
+                .itemDescription(UPDATED_ITEM_DESCRIPTON)
                 .build();
 
         itemWithoutName = Item.builder()
-                .itemDescription("It's a metal can.")
+                .itemDescription(SAMPLE_ITEM_DESCRIPTION)
                 .build();
 
         itemWithoutDescription = Item.builder()
-                .itemName("Aluminium Cans")
+                .itemName(SAMPLE_ITEM_NAME)
                 .build();
 
         itemWithNothing = new Item();
@@ -117,9 +121,9 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.itemId")
                             .value(createdItemId))
                 .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
+                            .value(SAMPLE_ITEM_NAME))
                 .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."));
+                            .value(SAMPLE_ITEM_DESCRIPTION));
     }
 
     @DisplayName("Get Item By Id - Invalid Id")
@@ -157,9 +161,9 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.itemId")
                             .value(createdItemId))
                 .andExpect(jsonPath("$.itemName")
-                            .value("Steel Cans"))
+                            .value(UPDATED_ITEM_NAME))
                 .andExpect(jsonPath("$.itemDescription")
-                            .value("It's STILL a metal can."));
+                            .value(UPDATED_ITEM_DESCRIPTON));
     }
 
     @DisplayName("Update Item - Invalid Id")
@@ -380,9 +384,9 @@ class ItemControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.itemId").exists())
                 .andExpect(jsonPath("$.itemName")
-                            .value("Aluminium Cans"))
+                            .value(SAMPLE_ITEM_NAME))
                 .andExpect(jsonPath("$.itemDescription")
-                            .value("It's a metal can."))
+                            .value(SAMPLE_ITEM_DESCRIPTION))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
