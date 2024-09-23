@@ -23,6 +23,17 @@ public class ContactServiceImpl implements ContactService {
     // Create
     @Override
     public Contact createContact(Contact contact) {
+        //check if any of first or last name exist and email or phone exist
+        if ((contact.getFirstName() == null || contact.getFirstName().trim().isEmpty()) 
+            && (contact.getLastName() == null || contact.getLastName().trim().isEmpty())) {
+            throw new ValidationException("Either first name or last name must be provided.");
+        }
+
+        // Check if either email or phoneNumber is provided
+        if ((contact.getEmail() == null || contact.getEmail().trim().isEmpty()) 
+            && (contact.getPhoneNumber() == null || contact.getPhoneNumber().trim().isEmpty())) {
+            throw new ValidationException("Either email or phone number must be provided.");
+        }
         // Sanitize messageContent to remove dangerous HTML
         String sanitizedMessage = Jsoup.clean(contact.getMessageContent(), Safelist.none());
 

@@ -5,10 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -26,22 +23,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "contact")
 public class Contact {
-
-    @PrePersist
-    @PreUpdate
-    public void validate() {
-        if ((firstName == null || firstName.trim().isEmpty())
-            && (lastName == null || lastName.trim().isEmpty())) {
-            System.out.println("Validation failed: Both first name and last name are empty");
-            throw new ValidationException("Either first name or last name must be provided.");
-        }
-
-        if ((phoneNumber == null || phoneNumber.trim().isEmpty())
-            && (email == null || email.trim().isEmpty())) {
-            System.out.println("Validation failed: Both phone number and email are empty");
-            throw new ValidationException("Either phone number or email must be provided.");
-        }
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
