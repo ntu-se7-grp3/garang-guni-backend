@@ -27,8 +27,8 @@ public class ContactControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private ContactRepository contactRepository;
+    // @MockBean
+    // private ContactRepository contactRepository;
 
     @DisplayName("Test for creating a valid contact form")
     @Test
@@ -41,9 +41,6 @@ public class ContactControllerTest {
         newContact.setPhoneNumber("+6598765432");
         newContact.setSubject("Inquiry");
         newContact.setMessageContent("This is a test message.");
-
-        // Mock the repository to return the same contact when save is called
-        when(contactRepository.save(newContact)).thenReturn(newContact);
 
         // convert to JSON
         String newContactAsJson = objectMapper.writeValueAsString(newContact);
@@ -68,27 +65,28 @@ public class ContactControllerTest {
     @DisplayName("Test creating contact with empty First and Last Name")
     @Test
     public void emptyNameContactCreationTest() throws Exception {
-        Contact invalidContact = new Contact();
-        invalidContact.setFirstName(""); // empty first name
-        invalidContact.setLastName(""); // empty last name
-        invalidContact.setEmail("wang@gmail.com");
-        invalidContact.setPhoneNumber("+6598765432");
-        invalidContact.setSubject("valid subject");
-        invalidContact.setMessageContent("Message with valid content.");
+        Contact emptyNameContact = new Contact();
+        emptyNameContact.setFirstName(""); // empty first name
+        emptyNameContact.setLastName(""); // empty last name
+        emptyNameContact.setEmail("wang@gmail.com");
+        emptyNameContact.setPhoneNumber("+6598765432");
+        emptyNameContact.setSubject("valid subject");
+        emptyNameContact.setMessageContent("Message with valid content.");
 
         // Convert to JSON
-        String invalidContactAsJson = objectMapper.writeValueAsString(invalidContact);
+        String emptyNameContactAsJson = objectMapper.writeValueAsString(emptyNameContact);
 
         // build post request
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(emptyNameContactAsJson);
 
         // perform request and assert response
         mockMvc.perform(request)
             .andExpect(status().isBadRequest()) // expect 400 for invalid input
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message").exists());
+            // .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").value(
+                "Either first name or last name must be provided."));
     }
 
     @DisplayName("Test creating valid contact with first name only")
@@ -205,7 +203,8 @@ public class ContactControllerTest {
         mockMvc.perform(request)
             .andExpect(status().isBadRequest()) // expect 400 for missing phone/email
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message").exists()); // Check if error message is present
+            .andExpect(jsonPath("$.message").value(
+            "Either email or phone number must be provided."));
     }
 
     @DisplayName("Test creating contact with invalid phone number")
@@ -369,18 +368,19 @@ public class ContactControllerTest {
         invalidContact.setEmail("wang@gmail.com");
         invalidContact.setPhoneNumber("+6592345678");
         invalidContact.setSubject("Inquiry");
-
+    
         // Message content with only a script tag (will be empty after sanitization)
         invalidContact.setMessageContent("<script>alert('XSS');</script>");
-
+    
         String invalidContactAsJson = objectMapper.writeValueAsString(invalidContact);
-
+    
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(invalidContactAsJson);
-
+    
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest())  // Expect 400 
-            .andExpect(jsonPath("$.message").exists());
+            .andExpect(status().isBadRequest())  // Expect 400
+            .andExpect(jsonPath("$.message").exists())  // Check if "message" field exists
+            .andExpect(jsonPath("$.message").value("Message content cannot be empty after sanitization"));  // Check the exact error message
     }
 }

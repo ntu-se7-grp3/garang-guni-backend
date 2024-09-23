@@ -1,5 +1,6 @@
 package sg.edu.ntu.garang_guni_backend.exceptions;
 
+import jakarta.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;
@@ -45,6 +46,14 @@ public class GlobalExceptionHandler {
             sb.append(error.getDefaultMessage()).append(". ");
         }
         ErrorResponse errorResponse = new ErrorResponse(sb.toString(), LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
+    }
+
+    // Handle service-layer validation exceptions (e.g., empty message content after XSS sanitization)
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex) {
+        logger.warn("Validation failed: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("ex.getMessage()", LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
     }
 

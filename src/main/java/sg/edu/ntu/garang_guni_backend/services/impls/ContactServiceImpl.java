@@ -10,7 +10,7 @@ import sg.edu.ntu.garang_guni_backend.entities.Contact;
 import sg.edu.ntu.garang_guni_backend.repositories.ContactRepository;
 import sg.edu.ntu.garang_guni_backend.services.ContactService;
 
-@Primary
+// @Primary
 @Service
 public class ContactServiceImpl implements ContactService {
 

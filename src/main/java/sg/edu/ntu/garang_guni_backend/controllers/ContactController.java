@@ -1,6 +1,7 @@
 package sg.edu.ntu.garang_guni_backend.controllers;
 
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,11 +25,22 @@ public class ContactController {
         this.contactService = contactService;
     }
 
-    // Create contact form
+    //Create contact form
+    // @PostMapping({ "", "/" })
+    // public ResponseEntity<Contact> createContact(@Valid @RequestBody Contact contact) {
+    //     Contact savedContact = contactService.createContact(contact);
+    //     return new ResponseEntity<>(savedContact, HttpStatus.CREATED);
+    // }
+
     @PostMapping({ "", "/" })
     public ResponseEntity<Contact> createContact(@Valid @RequestBody Contact contact) {
-        Contact savedContact = contactService.createContact(contact);
-        return new ResponseEntity<>(savedContact, HttpStatus.CREATED);
+        try {
+            Contact createdContact = contactService.createContact(contact);
+            System.out.println("contact created");
+            return new ResponseEntity<>(createdContact, HttpStatus.CREATED);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
     }
 
     // Read all contact forms
