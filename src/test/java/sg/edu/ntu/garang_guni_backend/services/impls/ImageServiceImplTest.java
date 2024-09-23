@@ -216,15 +216,15 @@ class ImageServiceImplTest {
         });
 
         UUID savedImgUuid = imgService.uploadImageAndAssignItemId(item, file);
-        UUID randomItemId = UUID.randomUUID();
         assertEquals(imageId, savedImgUuid, 
-                "The saved Image id should be the same as the new Image id");
+            "The saved Image id should be the same as the new Image id");
         
         when(imgRepository.findById(savedImgUuid))
-               .thenReturn(imagesStored.stream()
-                    .filter(image -> image.getImageId().equals(savedImgUuid))
-                    .findFirst());
-
+                .thenReturn(imagesStored.stream()
+                .filter(image -> image.getImageId().equals(savedImgUuid))
+                .findFirst());
+        
+        UUID randomItemId = UUID.randomUUID();
         assertTrue(imgService.isLinked(savedImgUuid.toString(), itemId.toString()));
         verify(imgRepository, times(1)).save(any(Image.class));
         assertFalse(imgService.isLinked(savedImgUuid.toString(), randomItemId.toString()));
