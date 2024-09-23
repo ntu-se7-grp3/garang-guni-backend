@@ -18,7 +18,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthenticationServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository) {
+    public AuthenticationServiceImpl(PasswordEncoder passwordEncoder, 
+        UserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }

@@ -1,5 +1,11 @@
 package sg.edu.ntu.garang_guni_backend.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -8,12 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import jakarta.servlet.http.HttpServletRequest;
 import sg.edu.ntu.garang_guni_backend.entities.User;
 
 @Component
@@ -26,11 +26,12 @@ public class JwtTokenUtil {
     private static final String TOKEN_HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
 
-    @Autowired
+    // @Autowired
     public JwtTokenUtil(@Value("${jwt.secret.key}") String jwtSecretKey,
             @Value("${jwt.session.period:3600000}") long jwtSessionPeriod) {
         // Convert the String secret key into a Key object using SecretKeySpec
-        this.secretKey = new SecretKeySpec(jwtSecretKey.getBytes(), SignatureAlgorithm.HS256.getJcaName());
+        this.secretKey = new SecretKeySpec(
+            jwtSecretKey.getBytes(), SignatureAlgorithm.HS256.getJcaName());
         this.jwtSessionPeriod = jwtSessionPeriod;
         this.jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }
@@ -41,7 +42,8 @@ public class JwtTokenUtil {
         claims.put("lastName", user.getLastName());
 
         Date tokenCreateTime = new Date();
-        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(jwtSessionPeriod));
+        Date tokenValidity = new Date(
+            tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(jwtSessionPeriod));
 
         return Jwts.builder()
                 .setClaims(claims)

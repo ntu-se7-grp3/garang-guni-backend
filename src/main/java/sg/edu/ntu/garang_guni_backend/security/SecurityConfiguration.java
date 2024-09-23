@@ -1,5 +1,6 @@
 package sg.edu.ntu.garang_guni_backend.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import sg.edu.ntu.garang_guni_backend.services.impls.CustomUserDetailsService;
 
 @Configuration
@@ -22,8 +22,10 @@ public class SecurityConfiguration {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtTokenFilter jwtTokenFilter;
 
-    @Autowired
-    public SecurityConfiguration(CustomUserDetailsService customUserDetailsService, JwtTokenFilter jwtTokenFilter) {
+    // @Autowired
+    public SecurityConfiguration(CustomUserDetailsService customUserDetailsService, 
+        JwtTokenFilter jwtTokenFilter) {
+            
         this.customUserDetailsService = customUserDetailsService;
         this.jwtTokenFilter = jwtTokenFilter;
     }
@@ -34,10 +36,14 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
+    AuthenticationManager authenticationManager(
+        HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
+
         AuthenticationManagerBuilder authenticationManagerBuilder = http
                 .getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder);
+
+        authenticationManagerBuilder.userDetailsService(customUserDetailsService)
+            .passwordEncoder(passwordEncoder);
 
         return authenticationManagerBuilder.build();
     }
@@ -49,14 +55,16 @@ public class SecurityConfiguration {
         http = http.sessionManagement(management -> management
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http = http.exceptionHandling(handling -> handling.authenticationEntryPoint((request, response, ex) -> {
+        http = http.exceptionHandling(handling -> handling.authenticationEntryPoint((
+            request, response, ex) -> {
             response.sendError(
                     HttpServletResponse.SC_UNAUTHORIZED,
                     ex.getMessage());
         }));
 
         http.authorizeHttpRequests(
-                (authorize) -> authorize.requestMatchers("/auth/**").permitAll().anyRequest().authenticated());
+                (authorize) -> authorize.requestMatchers("/auth/**")
+                .permitAll().anyRequest().authenticated());
 
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -3,6 +3,7 @@ package sg.edu.ntu.garang_guni_backend.services.impls;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,8 @@ public class CustomUserDetailsServiceTest {
         when(userRepository.findByEmail("testuser@example.com")).thenReturn(user);
 
         // Act
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername("testuser@example.com");
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(
+            "testuser@example.com");
 
         // Assert
         assertEquals(user.getEmail(), userDetails.getUsername(), "User email should match");

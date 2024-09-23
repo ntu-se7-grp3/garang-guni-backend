@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 // import java.time.LocalDate;
 // import java.time.format.DateTimeFormatter;
 // import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -39,8 +40,9 @@ public class AuthenticationServiceImplTest {
     @Test
     public void signupTest() {
         // Arrange
-        String rawPassword = "P@ssword123";
-        String encodedPassword = "encodedPassword";
+        //should declare as close as possible to the first use
+        // String rawPassword = "P@ssword123"; 
+        // String encodedPassword = "encodedPassword";
 
         // String dobString = "29-07-1996";
         // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -50,11 +52,16 @@ public class AuthenticationServiceImplTest {
         user.setFirstName("Asher");
         user.setLastName("Chew");
         user.setEmail("testuser@example.com");
-        user.setPassword(rawPassword);
+        user.setPassword("P@ssword123");
+        String rawPassword = user.getPassword();
+
+        // Declare `encodedPassword` just before its first use
+        String encodedPassword = "encodedPassword";
 
         // user =
         // User.builder().firstName("Asher").lastName("Chew").email("testuser@example.com")
-        // .password(rawPassword).role(UserRole.parseUserRole("Customer")).contactNo("98761234").dob(dob)
+        // .password(rawPassword).role(UserRole.parseUserRole("Customer"))
+                //.contactNo("98761234").dob(dob)
         // .gender(Gender.parseGender("Male"))
         // .postalCode("209123").address("123 Main
         // St").floor(12).unitNumber(1234).build();

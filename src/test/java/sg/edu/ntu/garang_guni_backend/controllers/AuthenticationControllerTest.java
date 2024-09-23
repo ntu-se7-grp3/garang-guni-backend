@@ -1,7 +1,9 @@
 package sg.edu.ntu.garang_guni_backend.controllers;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import sg.edu.ntu.garang_guni_backend.entities.User;
 
 @SpringBootTest
@@ -37,11 +38,11 @@ public class AuthenticationControllerTest {
                 .password("P@ssword123")
                 .build();
 
-        String newUserAsJSON = objectMapper.writeValueAsString(user);
+        String newUserAsJson = objectMapper.writeValueAsString(user);
 
         RequestBuilder request = MockMvcRequestBuilders.post("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(newUserAsJSON);
+                .content(newUserAsJson);
 
         // Act & Assert
         mockMvc.perform(request)
@@ -61,11 +62,11 @@ public class AuthenticationControllerTest {
                 .password("")
                 .build();
 
-        String newUserAsJSON = objectMapper.writeValueAsString(user);
+        String newUserAsJson = objectMapper.writeValueAsString(user);
 
         RequestBuilder request = MockMvcRequestBuilders.post("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(newUserAsJSON);
+                .content(newUserAsJson);
 
         // Act & Assert
         mockMvc.perform(request)
@@ -84,15 +85,16 @@ public class AuthenticationControllerTest {
                 .password("P@ssword123")
                 .build();
 
-        String newUserAsJSON = objectMapper.writeValueAsString(user);
+        String newUserAsJson = objectMapper.writeValueAsString(user);
 
         RequestBuilder request = MockMvcRequestBuilders.post("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(newUserAsJSON);
+                .content(newUserAsJson);
 
         // Act & Assert
         mockMvc.perform(request)
-                .andExpect(status().isConflict()) // Assuming the controller returns 409 Conflict for existing email
+                // Assuming the controller returns 409 Conflict for existing email
+                .andExpect(status().isConflict()) 
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 }

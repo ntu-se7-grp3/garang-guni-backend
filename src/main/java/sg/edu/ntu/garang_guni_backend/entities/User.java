@@ -1,8 +1,6 @@
 package sg.edu.ntu.garang_guni_backend.entities;
 
-import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.time.LocalDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,6 +13,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,7 +49,9 @@ public class User {
 
     @Column(name = "password")
     @NotBlank(message = "Password cannot be blank")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,}$", message = "Password must be at least 8 characters long and contain an uppercase letter, a lowercase letter, a number, and a special character.")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,}$", 
+        message = "Password must be at least 8 characters long and contain an uppercase letter,"
+        + " a lowercase letter, a number, and a special character.")
     private String password;
 
     @Column(name = "role")

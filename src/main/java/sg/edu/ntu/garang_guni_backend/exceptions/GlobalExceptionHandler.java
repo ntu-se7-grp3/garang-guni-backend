@@ -19,21 +19,25 @@ public class GlobalExceptionHandler {
 
     // Generic handler for not found exception
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(RuntimeException exception) {
-        ErrorResponse errorResponse = new ErrorResponse(exception.getMessage(), LocalDateTime.now());
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+        RuntimeException exception) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            exception.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception exception) {
         logger.error(exception.getMessage(), exception);
-        ErrorResponse errorResponse = new ErrorResponse("Something went wrong", LocalDateTime.now());
+        ErrorResponse errorResponse = new ErrorResponse(
+            "Something went wrong", LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // Validation Exception Handler
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
         // Get a list of all validation errors from the exception object
         List<ObjectError> validationErrors = ex.getBindingResult().getAllErrors();
         // Create a StringBuilder to store all error messages
