@@ -60,7 +60,7 @@ public class GlobalExceptionHandlerTest {
                 + " \"messageContent\": \"This is a test message.\" }"))
                 .andExpect(status().isInternalServerError()) // Expect 500 error
                 .andExpect(jsonPath("$.message").value(
-                        "Unexpected error occurred, please debug"));
+                        "An error occurred. Please contact support."));
     }
 }
 

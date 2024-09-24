@@ -38,8 +38,8 @@ public class Contact {
     private String lastName;
 
     @Pattern(
-        regexp = "^\\+65(6\\d{7}|[89]\\d{7})$", 
-        message = "Phone number must be in the format +65 followed by 8 digits" 
+        regexp = "^\\+65(6\\d{7}|[89]\\d{7})$",
+        message = "Phone number must be in the format +65 followed by 8 digits"
         + "starting with 6 (landline), 8, or 9 (mobile)")
     @Column(name = "phone_number")
     private String phoneNumber;

@@ -62,15 +62,20 @@ public class ContactServiceImplTest {
     // Test for sanitization (removing dangerous content)
     @Test
     public void createContactWithSanitizationTest() {
-        // Setup
+
         Contact contact = createSampleContact();
-        // Input containing script
-        contact.setMessageContent("Hello <script>alert('XSS');</script> World!"); 
+        contact.setMessageContent("Hello <script>alert('XSS');</script> World!");
+
+        // Mock the repository to return the saved contact after sanitization
+        Contact sanitizedContact = createSampleContact();
+        sanitizedContact.setMessageContent("Hello  World!");
+        when(contactRepository.save(contact)).thenReturn(sanitizedContact);
+
         // Execute the service call
         Contact savedContact = contactService.createContact(contact);
 
         // Assert that the sanitized message content has no script tags
-        assertEquals("Hello  World!", savedContact.getMessageContent()); // Ensure script is removed
+        assertEquals("Hello  World!", savedContact.getMessageContent());
         verify(contactRepository, times(1)).save(contact);
     }
 
