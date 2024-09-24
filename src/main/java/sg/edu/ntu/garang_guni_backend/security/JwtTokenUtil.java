@@ -6,11 +6,11 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import javax.crypto.spec.SecretKeySpec;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
@@ -26,12 +26,10 @@ public class JwtTokenUtil {
     private static final String TOKEN_HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
 
-    // @Autowired
     public JwtTokenUtil(@Value("${jwt.secret.key}") String jwtSecretKey,
             @Value("${jwt.session.period:3600000}") long jwtSessionPeriod) {
-        // Convert the String secret key into a Key object using SecretKeySpec
         this.secretKey = new SecretKeySpec(
-            jwtSecretKey.getBytes(), SignatureAlgorithm.HS256.getJcaName());
+            jwtSecretKey.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
         this.jwtSessionPeriod = jwtSessionPeriod;
         this.jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }

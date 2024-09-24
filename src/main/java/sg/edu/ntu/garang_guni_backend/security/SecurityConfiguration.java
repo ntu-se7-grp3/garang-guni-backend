@@ -1,7 +1,7 @@
 package sg.edu.ntu.garang_guni_backend.security;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,12 +20,12 @@ import sg.edu.ntu.garang_guni_backend.services.impls.CustomUserDetailsService;
 public class SecurityConfiguration {
 
     private final CustomUserDetailsService customUserDetailsService;
+    
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     private final JwtTokenFilter jwtTokenFilter;
 
-    // @Autowired
     public SecurityConfiguration(CustomUserDetailsService customUserDetailsService, 
-        JwtTokenFilter jwtTokenFilter) {
-            
+        JwtTokenFilter jwtTokenFilter) {            
         this.customUserDetailsService = customUserDetailsService;
         this.jwtTokenFilter = jwtTokenFilter;
     }
