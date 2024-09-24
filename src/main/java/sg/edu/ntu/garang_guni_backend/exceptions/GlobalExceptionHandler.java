@@ -15,10 +15,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageUtilsException;
 import sg.edu.ntu.garang_guni_backend.exceptions.item.ItemNotFoundException;
+import sg.edu.ntu.garang_guni_backend.exceptions.location.LocationNotFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler({ImageNotFoundException.class, ItemNotFoundException.class})
+    @ExceptionHandler(
+        {
+            ImageNotFoundException.class,
+            ItemNotFoundException.class,
+            LocationNotFoundException.class
+        })
     public ResponseEntity<ErrorResponse> handleResourceException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
@@ -32,7 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
-                MethodArgumentNotValidException ex) { 
+                MethodArgumentNotValidException ex) {
         List<ObjectError> validationErrors = ex.getBindingResult().getAllErrors();
         StringBuilder sb = new StringBuilder();
         for (ObjectError error : validationErrors) {
@@ -44,7 +50,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
-                DataIntegrityViolationException ex) {
+            DataIntegrityViolationException ex) {
         String errorMsg = ex.getMessage();
         String re = "Detail: ([^]]+)";
         Pattern pattern = Pattern.compile(re);
@@ -57,7 +63,7 @@ public class GlobalExceptionHandler {
         }
 
         ErrorResponse errorMessage = new ErrorResponse(
-            "A data integrity error occurred: " + detailMsg, LocalDateTime.now());
+                    "A data integrity error occurred: " + detailMsg, LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
     }
 
