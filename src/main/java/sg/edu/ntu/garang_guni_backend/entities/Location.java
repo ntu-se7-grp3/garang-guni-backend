@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -57,10 +58,16 @@ public class Location {
     @Column(name = "location_address")
     private String locationAddress;
 
+    @Digits(integer = 3, fraction = 6, 
+            message = "Latitude must have up to 3 digits before" 
+                + " and 6 digits after the decimal point.")
     @NotNull(message = "latitude of a place is mandatory!")
     @Column(name = "latitude", precision = 9, scale = 6)
     private BigDecimal latitude;
 
+    @Digits(integer = 3, fraction = 6, 
+            message = "Longitude must have up to 3 digits before" 
+                + " and 6 digits after the decimal point.")
     @NotNull(message = "longitude of a place is mandatory!")
     @Column(name = "longitude", precision = 9, scale = 6)
     private BigDecimal longitude;
