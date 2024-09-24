@@ -81,7 +81,7 @@ public class AuthenticationControllerTest {
         user = User.builder()
                 .firstName("John")
                 .lastName("Doe")
-                .email("existing.email@example.com") // Email that already exists
+                .email("john.doe@example.com") // Email that already exists
                 .password("P@ssword123")
                 .build();
 
