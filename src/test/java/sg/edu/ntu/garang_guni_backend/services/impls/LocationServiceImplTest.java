@@ -60,7 +60,10 @@ import sg.edu.ntu.garang_guni_backend.repositories.LocationRepository;
     @DisplayName("Create Location - Successful")
     @Test
     void createLocationTest() {
-        when(locationRepository.save(sampleLocation)).thenReturn(sampleLocation);
+        when(locationRepository.save(any(Location.class)))
+                .thenAnswer(invocation ->  {
+                    return invocation.getArgument(0);
+                });
         Location createdLocation = locationService.createLocation(sampleLocation);
         assertEquals(sampleLocation.getLocationName(),
                 createdLocation.getLocationName());
