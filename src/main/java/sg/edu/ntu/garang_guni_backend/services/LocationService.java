@@ -11,7 +11,7 @@ public interface LocationService {
 
     List<Location> getLocationsWithoutBooking();
 
-    Location updateLocation(UUID locationId, Location updatedLocatio);
+    Location updateLocation(UUID locationId, Location updatedLocation);
 
     Location deleteLocation(UUID locationId);
 }
