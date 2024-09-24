@@ -50,7 +50,7 @@ public class LocationServiceImpl implements LocationService {
         locationToUpdate.setLatitude(updatedLocation.getLatitude());
         locationToUpdate.setLongitude(updatedLocation.getLongitude());
 
-        return new Location(locationToUpdate);
+        return new Location(locationRepository.save(locationToUpdate));
     }
 
     @Override

@@ -52,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
         retrievedItem.setItemDescription(updatedItem.getItemDescription());
         retrievedItem.setImages(updatedItem.getImages());
 
-        return itemRepository.save(retrievedItem);
+        return new Item(itemRepository.save(retrievedItem));
     }
 
     @Override
