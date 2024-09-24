@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex) {
         logger.warn("Validation failed: {}", ex.getMessage());
-        ErrorResponse errorResponse = new ErrorResponse("ex.getMessage()", LocalDateTime.now());
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
     }
 

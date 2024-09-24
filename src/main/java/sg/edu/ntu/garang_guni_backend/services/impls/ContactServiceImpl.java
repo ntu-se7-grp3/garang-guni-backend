@@ -4,7 +4,7 @@ import jakarta.validation.ValidationException;
 import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
-import org.springframework.context.annotation.Primary;
+// import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import sg.edu.ntu.garang_guni_backend.entities.Contact;
 import sg.edu.ntu.garang_guni_backend.repositories.ContactRepository;

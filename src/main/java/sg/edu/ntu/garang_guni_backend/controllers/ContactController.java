@@ -39,7 +39,7 @@ public class ContactController {
             System.out.println("contact created");
             return new ResponseEntity<>(createdContact, HttpStatus.CREATED);
         } catch (ValidationException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
