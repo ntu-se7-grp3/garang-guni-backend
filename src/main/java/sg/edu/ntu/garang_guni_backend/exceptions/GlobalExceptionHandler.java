@@ -26,6 +26,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UserExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUserExistsException(UserExistsException exception) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            exception.getMessage(),
+            LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception exception) {
         logger.error(exception.getMessage(), exception);
