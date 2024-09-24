@@ -8,6 +8,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -38,7 +40,8 @@ public class Item {
             itemToBeClone.getItemDescription(),
             itemToBeClone.getCreatedAt(),
             itemToBeClone.getUpdatedAt(),
-            itemToBeClone.getImages()
+            itemToBeClone.getImages(),
+            itemToBeClone.getBooking()
         );
     }
 
@@ -66,6 +69,10 @@ public class Item {
     @JsonBackReference
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "item", cascade = CascadeType.ALL)
     private List<Image> images;
+
+    @ManyToOne
+    @JoinColumn(name = "bookingId", referencedColumnName = "bookingId")
+    private Booking booking;
 
     public Date getCreatedAt() {
         return (createdAt != null) ? new Date(createdAt.getTime()) : null;
