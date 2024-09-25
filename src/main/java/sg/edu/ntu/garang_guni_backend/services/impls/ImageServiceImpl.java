@@ -34,12 +34,22 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public UUID uploadImageAndAssignItemId(Item item, MultipartFile file) {
+    public UUID assignItemToNewImage(Item item, MultipartFile file) {
         Image buildImg = buildImageFromFile(file);
         buildImg.setItem(item);
         imgRepository.save(buildImg);
         
         return buildImg.getImageId();
+    }
+
+    @Override
+    public UUID assignItemToExistingImage(Item item, UUID imageId) {
+        Image dbImage = imgRepository.findById(imageId)
+                .orElseThrow(() -> new ImageNotFoundException(imageId));
+        dbImage.setItem(item);
+        imgRepository.save(dbImage);
+        
+        return dbImage.getImageId();
     }
 
     public Image buildImageFromFile(MultipartFile file) {

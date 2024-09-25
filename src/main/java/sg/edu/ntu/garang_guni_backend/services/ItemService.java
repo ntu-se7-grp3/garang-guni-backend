@@ -21,5 +21,7 @@ public interface ItemService {
 
     UUID addNewImageToItem(UUID id, MultipartFile newImage);
 
+    UUID addExistingImageToItem(UUID itemId, UUID imageId);
+
     List<String> getAllImages(UUID id);
 }

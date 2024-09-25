@@ -7,7 +7,9 @@ import sg.edu.ntu.garang_guni_backend.entities.Item;
 public interface ImageService {
     UUID uploadImage(MultipartFile file);
 
-    UUID uploadImageAndAssignItemId(Item item, MultipartFile file);
+    UUID assignItemToNewImage(Item item, MultipartFile file);
+
+    UUID assignItemToExistingImage(Item item, UUID imageId);
     
     byte[] getImageByName(String imageName);
 

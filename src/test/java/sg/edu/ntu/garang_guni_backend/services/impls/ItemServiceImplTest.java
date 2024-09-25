@@ -177,7 +177,7 @@ class ItemServiceImplTest {
     void addImageToItemTest() {
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(sampleItem));
         UUID uploadedImgId = UUID.randomUUID();
-        when(imgService.uploadImageAndAssignItemId(sampleItem, imgFile))
+        when(imgService.assignItemToNewImage(sampleItem, imgFile))
                 .thenReturn(uploadedImgId);
 
         UUID result = itemService.addNewImageToItem(itemId, imgFile);
@@ -187,7 +187,7 @@ class ItemServiceImplTest {
         verify(itemRepository, times(1))
                 .findById(itemId);
         verify(imgService, times(1))
-                .uploadImageAndAssignItemId(sampleItem, imgFile);
+                .assignItemToNewImage(sampleItem, imgFile);
     }
 
     @DisplayName("Add Image to Item - Invalid Id")

@@ -56,10 +56,18 @@ public class ItemController {
     }
 
     @PostMapping({"/{id}/images", "/{id}/images/"})
-    public ResponseEntity<UUID> addImageToItem(
+    public ResponseEntity<UUID> addNewImageToItem(
             @PathVariable UUID id,
             @RequestParam("image") MultipartFile newImage) {
         UUID newImageId = itemService.addNewImageToItem(id, newImage);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newImageId);
+    }
+
+    @PutMapping("/{itemId}/images/{imageId}")
+    public ResponseEntity<UUID> addExistingImageToItem(
+            @PathVariable UUID itemId,
+            @PathVariable UUID imageId) {
+        UUID newImageId = itemService.addExistingImageToItem(itemId, imageId);
         return ResponseEntity.status(HttpStatus.CREATED).body(newImageId);
     }
 

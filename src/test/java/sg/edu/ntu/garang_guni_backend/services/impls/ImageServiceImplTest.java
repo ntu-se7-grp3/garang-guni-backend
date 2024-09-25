@@ -215,7 +215,7 @@ class ImageServiceImplTest {
             return img;
         });
 
-        UUID savedImgUuid = imgService.uploadImageAndAssignItemId(item, file);
+        UUID savedImgUuid = imgService.assignItemToNewImage(item, file);
         assertEquals(imageId, savedImgUuid, 
             "The saved Image id should be the same as the new Image id");
         
@@ -242,7 +242,7 @@ class ImageServiceImplTest {
                 .build();
 
         assertThrows(ImageUnsupportedTypeException.class,
-                () -> imgService.uploadImageAndAssignItemId(item, file));
+                () -> imgService.assignItemToNewImage(item, file));
     }
 
     @Test

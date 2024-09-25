@@ -88,11 +88,19 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public UUID addNewImageToItem(UUID id, MultipartFile file) {
+    public UUID addNewImageToItem(UUID itemId, MultipartFile file) {
         Item selectedItem = itemRepository
-                .findById(id)
-                .orElseThrow(() -> new ItemNotFoundException(id));
-        return imgService.uploadImageAndAssignItemId(selectedItem, file);
+                .findById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException(itemId));
+        return imgService.assignItemToNewImage(selectedItem, file);
+    }
+
+    @Override
+    public UUID addExistingImageToItem(UUID itemId, UUID imageId) {
+        Item selectedItem = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException(itemId));
+        return imgService.assignItemToExistingImage(selectedItem, imageId);
     }
 
     @Override
