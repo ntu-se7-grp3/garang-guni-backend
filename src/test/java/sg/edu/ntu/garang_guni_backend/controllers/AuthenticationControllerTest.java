@@ -1,6 +1,8 @@
 package sg.edu.ntu.garang_guni_backend.controllers;
 
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -11,11 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import sg.edu.ntu.garang_guni_backend.entities.User;
+import sg.edu.ntu.garang_guni_backend.repositories.UserRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc // This is needed to autowire the MockMvc object
@@ -26,6 +31,12 @@ public class AuthenticationControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private PasswordEncoder passwordEncoder;
 
     private User user;
 
@@ -41,6 +52,10 @@ public class AuthenticationControllerTest {
                 .build();
 
         String newUserAsJson = objectMapper.writeValueAsString(user);
+
+        when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode(user.getPassword())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         RequestBuilder request = MockMvcRequestBuilders.post("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -88,6 +103,8 @@ public class AuthenticationControllerTest {
                 .build();
 
         String newUserAsJson = objectMapper.writeValueAsString(user);
+
+        when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
 
         RequestBuilder request = MockMvcRequestBuilders.post("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
