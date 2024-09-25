@@ -3,6 +3,8 @@ package sg.edu.ntu.garang_guni_backend.services.impls;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import sg.edu.ntu.garang_guni_backend.entities.Booking;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.exceptions.booking.BookingNotFoundException;
@@ -14,6 +16,8 @@ import sg.edu.ntu.garang_guni_backend.services.ItemService;
 public class BookingServiceImpl implements BookingService {
 
     private BookingRepository bookingRepository;
+    
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     private ItemService itemService;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
