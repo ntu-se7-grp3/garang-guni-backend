@@ -8,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
-import sg.edu.ntu.garang_guni_backend.entities.UserRole;
 import sg.edu.ntu.garang_guni_backend.services.ScrapDealerService;
 
 import java.util.List;
@@ -52,7 +51,7 @@ public class ScrapDealerController {
         String role = auth.getAuthorities().iterator().next().getAuthority();
         UUID loggedInUserId = (UUID) auth.getPrincipal();
 
-        if (role.equals("ROLE_ADMIN") || loggedInUserId.equals(id)) {
+        if (role.equals("ROLE_SCRAP_DEALER") || loggedInUserId.equals(id)) {
             ScrapDealer updatedDealer = scrapDealerService.updateScrapDealer(id, scrapDealer, loggedInUserId);
             return ResponseEntity.status(HttpStatus.OK).body(updatedDealer);
         }
@@ -66,7 +65,7 @@ public class ScrapDealerController {
         String role = auth.getAuthorities().iterator().next().getAuthority();
         UUID loggedInUserId = (UUID) auth.getPrincipal();
 
-        if (role.equals("ROLE_ADMIN") || loggedInUserId.equals(id)) {
+        if (role.equals("ROLE_SCRAP_DEALER") || loggedInUserId.equals(id)) {
             scrapDealerService.deleteDealerById(id, loggedInUserId);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }

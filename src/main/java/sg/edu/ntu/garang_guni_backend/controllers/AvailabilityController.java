@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.core.Authentication;
-// import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import sg.edu.ntu.garang_guni_backend.entities.Availability;
 import sg.edu.ntu.garang_guni_backend.services.AvailabilityService;
@@ -26,8 +26,7 @@ public class AvailabilityController {
                                                            @Valid @RequestBody Availability availability) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String role = auth.getAuthorities().iterator().next().getAuthority();
-        UUID loggedInUserId = (UUID) auth.getPrincipal();
-
+        
         if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
             Availability createdAvailability = availabilityService.createAvailability(scrapDealerId, availability);
             return new ResponseEntity<>(createdAvailability, HttpStatus.CREATED);

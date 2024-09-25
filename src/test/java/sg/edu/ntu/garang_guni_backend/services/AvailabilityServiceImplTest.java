@@ -51,12 +51,15 @@ public class AvailabilityServiceImplTest {
     }
 
     @Test
-    @DisplayName("Test Creating Availability with Pass Date")
+    @DisplayName("Test Creating Availability with Past Date")
     void testCreateAvailabilityInvalidDate() {
         availability.setAvailableDate(LocalDate.now().minusDays(1));
 
+        when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(scrapDealer));
+
         assertThrows(InvalidDateException.class, () -> availabilityService.createAvailability(scrapDealer.getScrapDealerId(), availability));
     }
+
 
     @Test
     @DisplayName("Test Updating Availability Date Successfully")

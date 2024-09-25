@@ -8,11 +8,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
 import sg.edu.ntu.garang_guni_backend.services.ScrapDealerService;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class ScrapDealerExceptionTest {
 

@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class})
 public class AvailabilityControllerTest {
 
     @Autowired
@@ -56,7 +58,8 @@ public class AvailabilityControllerTest {
         mockMvc.perform(post("/availability/{scrapDealerId}", UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(availability)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Available date is required"));
     }
 
     @Test
@@ -67,13 +70,17 @@ public class AvailabilityControllerTest {
         mockMvc.perform(post("/availability/{scrapDealerId}", UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(availability)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Location is required"));
     }
 
     @Test
     @DisplayName("Test Updating Availability Date")
     void testUpdatingAvailabilityDate() throws Exception {
         availability.setAvailableDate(LocalDate.now().plusDays(2));
+
+        when(availabilityService.updateAvailability(any(Long.class), any(Availability.class), any(UUID.class)))
+                .thenReturn(availability);
 
         mockMvc.perform(put("/availability/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -87,6 +94,9 @@ public class AvailabilityControllerTest {
     void testUpdatingAvailabilityLocation() throws Exception {
         availability.setLocation("Updated Location");
 
+        when(availabilityService.updateAvailability(any(Long.class), any(Availability.class), any(UUID.class)))
+                .thenReturn(availability);
+
         mockMvc.perform(put("/availability/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(availability)))
@@ -99,6 +109,8 @@ public class AvailabilityControllerTest {
     void testDeleteAvailabilityById() throws Exception {
         mockMvc.perform(delete("/availability/{id}", 1L))
                 .andExpect(status().isNoContent());
+
+        verify(availabilityService).deleteAvailability(any(Long.class), any(UUID.class));
     }
 
     @Test
@@ -109,7 +121,8 @@ public class AvailabilityControllerTest {
         mockMvc.perform(post("/availability/{scrapDealerId}", UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(availability)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Location should not exceed 50 characters"));
     }
 
     @Test
