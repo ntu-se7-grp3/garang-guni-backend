@@ -3,6 +3,8 @@ package sg.edu.ntu.garang_guni_backend.entities;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -55,6 +57,7 @@ public class User {
     private String password;
 
     @Column(name = "role")
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 
     @Column(name = "contact_no")
@@ -67,6 +70,7 @@ public class User {
     private LocalDate dob;
 
     @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @Column(name = "postal_code")
