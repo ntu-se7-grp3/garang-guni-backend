@@ -1,12 +1,12 @@
 package sg.edu.ntu.garang_guni_backend.services.impls;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import sg.edu.ntu.garang_guni_backend.entities.Booking;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
+import sg.edu.ntu.garang_guni_backend.entities.Location;
 import sg.edu.ntu.garang_guni_backend.exceptions.booking.BookingNotFoundException;
 import sg.edu.ntu.garang_guni_backend.repositories.BookingRepository;
 import sg.edu.ntu.garang_guni_backend.services.BookingService;
@@ -37,7 +37,7 @@ public class BookingServiceImpl implements BookingService {
                 .paymentMethod(newBooking.getPaymentMethod())
                 .remarks(newBooking.getRemarks())
                 .build();
-        return bookingRepository.save(cloneBooking);
+        return new Booking(bookingRepository.save(cloneBooking));
     }
 
     @Override
@@ -101,5 +101,30 @@ public class BookingServiceImpl implements BookingService {
                             .map(Item::new)
                             .toList()
             : null;
+    }
+
+    @Override
+    public Booking assignLocationToNewBooking(Booking newBooking,
+            Location selectedLocation) {
+        Booking cloneBooking = Booking.builder()
+                .userId(newBooking.getUserId())
+                .bookingDateTime(newBooking.getBookingDateTime())
+                .appointmentDateTime(newBooking.getAppointmentDateTime())
+                .isLocationSameAsRegistered(newBooking.isLocationSameAsRegistered())
+                .collectionType(newBooking.getCollectionType())
+                .paymentMethod(newBooking.getPaymentMethod())
+                .remarks(newBooking.getRemarks())
+                .build();
+        cloneBooking.setLocation(selectedLocation);
+        return new Booking(bookingRepository.save(cloneBooking));
+    }
+
+    @Override
+    public Booking assignLocationToExistingBooking(UUID bookingId,
+            Location selectedLocation) {
+        Booking selectedBooking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException(bookingId));
+        selectedBooking.setLocation(selectedLocation);
+        return new Booking(bookingRepository.save(selectedBooking));
     }
 }

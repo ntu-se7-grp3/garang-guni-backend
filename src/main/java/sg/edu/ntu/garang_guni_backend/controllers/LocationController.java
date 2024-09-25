@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sg.edu.ntu.garang_guni_backend.entities.Booking;
 import sg.edu.ntu.garang_guni_backend.entities.Location;
 import sg.edu.ntu.garang_guni_backend.services.LocationService;
+
 
 @RestController
 @RequestMapping("/locations")
@@ -59,6 +61,33 @@ public class LocationController {
     public ResponseEntity<Location> deleteLocation(@PathVariable UUID id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body(locationService.deleteLocation(id));
+    }
+
+    @PostMapping("/{locationId}/bookings")
+    public ResponseEntity<Booking> addNewBookingToLocation(
+            @PathVariable UUID locationId,
+            @Valid @RequestBody Booking newBooking) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(locationService
+                        .addNewBookingToLocation(locationId, newBooking));
+    }
+
+    @PutMapping("/{locationId}/bookings/{bookingId}")
+    public ResponseEntity<Booking> addExisitingBookingToLocation(
+            @PathVariable UUID locationId,
+            @PathVariable UUID bookingId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(locationService
+                    .addExisitingBookingToLocation(locationId, bookingId));
+        
+    }
+
+    @GetMapping({"/{locationId}/bookings", "/{locationId}/bookings/"})
+    public ResponseEntity<List<Booking>> getAllBookings(
+            @PathVariable UUID locationId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(locationService.getAllBookings(locationId));
     }
 }
  

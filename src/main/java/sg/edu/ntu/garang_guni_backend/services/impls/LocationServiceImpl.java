@@ -1,19 +1,28 @@
 package sg.edu.ntu.garang_guni_backend.services.impls;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import sg.edu.ntu.garang_guni_backend.entities.Booking;
 import sg.edu.ntu.garang_guni_backend.entities.Location;
 import sg.edu.ntu.garang_guni_backend.exceptions.location.LocationNotFoundException;
 import sg.edu.ntu.garang_guni_backend.repositories.LocationRepository;
+import sg.edu.ntu.garang_guni_backend.services.BookingService;
 import sg.edu.ntu.garang_guni_backend.services.LocationService;
 
 @Service
 public class LocationServiceImpl implements LocationService {
     private LocationRepository locationRepository;
 
-    public LocationServiceImpl(LocationRepository locationRepository) {
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
+    private BookingService bookingService;
+
+    public LocationServiceImpl(
+        LocationRepository locationRepository,
+        BookingService bookingService) {
         this.locationRepository = locationRepository;
+        this.bookingService = bookingService;
     }
 
     @Override
@@ -42,7 +51,7 @@ public class LocationServiceImpl implements LocationService {
                                     .map(Location::new)
                                     .toList();
             
-        locations.forEach(location -> location.setBooking(null));
+        locations.forEach(location -> location.setBookings(null));
         return locations;
     }
 
@@ -66,6 +75,37 @@ public class LocationServiceImpl implements LocationService {
         locationRepository.deleteById(locationId);
 
         return locationToDelete;
+    }
+    
+    @Override
+    public Booking addNewBookingToLocation(UUID locationId, Booking newBooking) {
+        Location selectedLocation = locationRepository.findById(locationId)
+                .orElseThrow(() -> new LocationNotFoundException(locationId));
+        
+        return bookingService
+                .assignLocationToNewBooking(newBooking, selectedLocation);
+    }
+
+    @Override
+    public Booking addExisitingBookingToLocation(UUID locationId, UUID bookingId) {
+        Location selectedLocation = locationRepository.findById(locationId)
+                .orElseThrow(() -> new LocationNotFoundException(locationId));
+        
+        return bookingService
+                .assignLocationToExistingBooking(bookingId, selectedLocation);
+    }
+
+    @Override
+    public List<Booking> getAllBookings(UUID locationId) {
+        Location selectedLocation = locationRepository.findById(locationId)
+                .orElseThrow(() -> new LocationNotFoundException(locationId));
+
+        return (!selectedLocation.getBookings().isEmpty())
+            ? selectedLocation.getBookings()
+                            .stream()
+                            .map(Booking::new)
+                            .toList()
+            : null;
     }
     
 }

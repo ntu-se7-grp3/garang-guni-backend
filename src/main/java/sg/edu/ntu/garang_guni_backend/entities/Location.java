@@ -42,7 +42,7 @@ public class Location {
             locationToBeClone.getLongitude(),
             locationToBeClone.getCreatedAt(),
             locationToBeClone.getUpdatedAt(),
-            locationToBeClone.getBooking()
+            locationToBeClone.getBookings()
         );
     }
 
@@ -82,5 +82,5 @@ public class Location {
 
     @JsonBackReference
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
-    private List<Booking> booking;
+    private List<Booking> bookings;
 }

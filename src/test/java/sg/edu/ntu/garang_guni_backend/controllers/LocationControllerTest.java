@@ -207,7 +207,7 @@ class LocationControllerTest {
                 .filter(location -> 
                         location.getLongitude().equals(SAMPLE_LOCATION_LNG))
                 .filter(location -> 
-                        location.getBooking() == null)
+                        location.getBookings() == null)
                 .toList();
         
         assertEquals(1, locationsLeft.size());
@@ -224,7 +224,7 @@ class LocationControllerTest {
                 .filter(location -> 
                         location.getLongitude().equals(SAMPLE_LOCATION_LNG))
                 .filter(location -> 
-                        location.getBooking() == null)
+                        location.getBookings() == null)
                 .toList();
         
         assertEquals(1, locationsLeft.size());
