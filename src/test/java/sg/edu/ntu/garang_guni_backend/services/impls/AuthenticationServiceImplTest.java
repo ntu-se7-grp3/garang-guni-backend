@@ -10,19 +10,28 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import sg.edu.ntu.garang_guni_backend.entities.LoginRequest;
 import sg.edu.ntu.garang_guni_backend.entities.User;
 import sg.edu.ntu.garang_guni_backend.exceptions.UserExistsException;
 import sg.edu.ntu.garang_guni_backend.repositories.UserRepository;
 
 @SpringBootTest
 public class AuthenticationServiceImplTest {
+
+    @Mock
+    private AuthenticationManager authenticationManager;
 
     @Mock
     private UserRepository userRepository;
@@ -33,14 +42,19 @@ public class AuthenticationServiceImplTest {
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
 
+    private LoginRequest loginRequest;
     private User user;
 
     @BeforeEach
     public void init() {
+        loginRequest = new LoginRequest();
+        loginRequest.setEmail("john.doe@example.com");
+        loginRequest.setPassword("P@ssword123");
+
         user = User.builder()
                 .firstName("John")
                 .lastName("Doe")
-                .email("test@example.com")
+                .email("john.doe@example.com")
                 .password("P@ssword123")
                 .build();
     }
@@ -94,7 +108,67 @@ public class AuthenticationServiceImplTest {
         User result = authenticationService.signup(user);
 
         // Assert
-        assertEquals(encodedPassword, result.getPassword());
+        assertEquals(encodedPassword, result.getPassword(), "The password should be encoded");
         verify(passwordEncoder).encode(rawPassword);
+    }
+
+    @DisplayName("Test successful authentication")
+    @Test
+    public void authenticateSuccessTest() {
+        // Arrange
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(null);
+        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.of(user));
+
+        // Act
+        User authenticatedUser = authenticationService.authenticate(loginRequest);
+
+        // Assert
+        assertNotNull(authenticatedUser);
+        assertEquals("john.doe@example.com",
+                    authenticatedUser.getEmail(),
+                    "The email should exists"
+        );
+
+        verify(authenticationManager, times(1))
+            .authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(userRepository, times(1)).findByEmail("john.doe@example.com");
+    }
+
+    @DisplayName("Test authentication with incorrect credentials")
+    @Test
+    public void authenticateInvalidCredentialsTest() {
+        // Arrange
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new BadCredentialsException("Invalid credentials"));
+
+        // Act & Assert
+        BadCredentialsException exception = assertThrows(
+                BadCredentialsException.class,
+                () -> authenticationService.authenticate(loginRequest));
+        assertEquals("Invalid credentials", exception.getMessage());
+
+        verify(authenticationManager, times(1))
+            .authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(userRepository, never()).findByEmail(anyString());
+    }
+
+    @DisplayName("Test authentication with non-existent user")
+    @Test
+    public void authenticateUserNotFoundTest() {
+        // Arrange
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(null);
+        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        UsernameNotFoundException exception = assertThrows(
+                UsernameNotFoundException.class,
+                () -> authenticationService.authenticate(loginRequest));
+        assertEquals("User not found with email: john.doe@example.com", exception.getMessage());
+
+        verify(authenticationManager, times(1))
+            .authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(userRepository, times(1)).findByEmail("john.doe@example.com");
     }
 }

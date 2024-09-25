@@ -15,12 +15,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import sg.edu.ntu.garang_guni_backend.entities.LoginRequest;
 import sg.edu.ntu.garang_guni_backend.entities.User;
 import sg.edu.ntu.garang_guni_backend.repositories.UserRepository;
+import sg.edu.ntu.garang_guni_backend.security.JwtTokenUtil;
+import sg.edu.ntu.garang_guni_backend.services.AuthenticationService;
 
 @SpringBootTest
 @AutoConfigureMockMvc // This is needed to autowire the MockMvc object
@@ -31,6 +36,12 @@ public class AuthenticationControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private AuthenticationService authenticationService;
+
+    @MockBean
+    private JwtTokenUtil jwtTokenUtil;
 
     @MockBean
     private UserRepository userRepository;
@@ -114,6 +125,83 @@ public class AuthenticationControllerTest {
         mockMvc.perform(request)
                 // Assuming the controller returns 409 Conflict for existing email
                 .andExpect(status().isConflict()) 
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @DisplayName("Test successful login")
+    @Test
+    public void authenticateSuccessTest() throws Exception {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("john.doe@example.com");
+        loginRequest.setPassword("P@ssword123");
+
+        user = User.builder()
+                .email("john.doe@example.com")
+                .password("P@ssword123")
+                .build();
+
+        String loginRequestAsJson = objectMapper.writeValueAsString(loginRequest);
+
+        when(authenticationService.authenticate(any(LoginRequest.class))).thenReturn(user);
+        when(jwtTokenUtil.createToken(user)).thenReturn("mockedJwtToken");
+
+        RequestBuilder request = MockMvcRequestBuilders.post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginRequestAsJson);
+
+        // Act & Assert
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.token").value(notNullValue()));
+    }
+
+    @DisplayName("Test login with invalid credentials")
+    @Test
+    public void authenticateInvalidCredentialsTest() throws Exception {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("john.doe@example.com");
+        loginRequest.setPassword("wrongPassword");
+
+        String loginRequestAsJson = objectMapper.writeValueAsString(loginRequest);
+
+        when(authenticationService.authenticate(any(LoginRequest.class)))
+                .thenThrow(new BadCredentialsException("Invalid credentials"));
+
+        RequestBuilder request = MockMvcRequestBuilders.post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginRequestAsJson);
+
+        // Act & Assert
+        mockMvc.perform(request)
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @DisplayName("Test login with non-existent user")
+    @Test
+    public void authenticateNonExistentUserTest() throws Exception {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("nonexistent@example.com");
+        loginRequest.setPassword("P@ssword123");
+
+        String loginRequestAsJson = objectMapper.writeValueAsString(loginRequest);
+
+        when(authenticationService.authenticate(any(LoginRequest.class)))
+                .thenThrow(new UsernameNotFoundException(
+                        "User not found with email: nonexistent@example.com"
+                        ));
+
+        RequestBuilder request = MockMvcRequestBuilders.post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginRequestAsJson);
+
+        // Act & Assert
+        mockMvc.perform(request)
+                .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 }
