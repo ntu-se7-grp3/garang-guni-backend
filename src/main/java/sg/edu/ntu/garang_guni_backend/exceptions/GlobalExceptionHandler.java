@@ -16,22 +16,28 @@ public class GlobalExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // Handle ContactNotFoundException
-    @ExceptionHandler(ContactNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleContactNotFoundException(
-        ContactNotFoundException ex) {
-        logger.error("Error: ", ex);
-        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND); // 404
+    @ExceptionHandler(ScrapDealerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleScrapDealerNotFound(ScrapDealerNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    // Handle ContactNotProcessingException
-    @ExceptionHandler(ContactNotProcessingException.class)
-    public ResponseEntity<ErrorResponse> handleContactNotProcessingException(
-            ContactNotProcessingException ex) {
-        logger.error("Error: ", ex);
-        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500
+    @ExceptionHandler(AvailabilityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAvailabilityNotFound(AvailabilityNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidDateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidDate(InvalidDateException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
     // Handle validation errors
@@ -51,7 +57,6 @@ public class GlobalExceptionHandler {
     // Handle generic exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        logger.error("Unexpected Error: ", ex);
         ErrorResponse errorResponse = new ErrorResponse(
                 "Unexpected error occurred, please debug", LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500

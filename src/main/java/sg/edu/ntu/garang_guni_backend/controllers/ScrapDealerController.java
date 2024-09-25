@@ -3,12 +3,15 @@ package sg.edu.ntu.garang_guni_backend.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
+import sg.edu.ntu.garang_guni_backend.entities.UserRole;
 import sg.edu.ntu.garang_guni_backend.services.ScrapDealerService;
 
+import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -19,9 +22,16 @@ public class ScrapDealerController {
     private ScrapDealerService scrapDealerService;
 
     @PostMapping({ "", "/" })
-    public ResponseEntity<ScrapDealer> createScrapDealer(@RequestBody ScrapDealer scrapDealer) {
-        ScrapDealer createdDealer = scrapDealerService.createDealer(scrapDealer);
-        return new ResponseEntity<>(createdDealer, HttpStatus.CREATED);
+    public ResponseEntity<ScrapDealer> createScrapDealer(@Valid @RequestBody ScrapDealer scrapDealer) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserRole role = (UserRole) auth.getAuthorities().iterator().next();
+        
+        if (role == UserRole.SCRAP_DEALER || role == UserRole.ADMIN) {
+            ScrapDealer createdDealer = scrapDealerService.createDealer(scrapDealer);
+            return new ResponseEntity<>(createdDealer, HttpStatus.CREATED);
+        }
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @GetMapping({ "", "/" })
@@ -36,11 +46,32 @@ public class ScrapDealerController {
         return ResponseEntity.status(HttpStatus.OK).body(dealer);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ScrapDealer> deleteDealerById(@PathVariable UUID id) {
-        scrapDealerService.deleteDealerById(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    @PutMapping("/{id}")
+    public ResponseEntity<ScrapDealer> updateScrapDealer(@PathVariable UUID id, @Valid @RequestBody ScrapDealer scrapDealer) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserRole role = (UserRole) auth.getAuthorities().iterator().next();
+        UUID loggedInUserId = ...; // Retrieve logged-in user's UUID from authentication
+
+        if (role == UserRole.ADMIN || loggedInUserId.equals(id)) {
+            ScrapDealer updatedDealer = scrapDealerService.updateScrapDealer(id, scrapDealer);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedDealer);
+        }
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDealerById(@PathVariable UUID id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserRole role = (UserRole) auth.getAuthorities().iterator().next();
+        UUID loggedInUserId = ...; // Retrieve logged-in user's UUID from authentication
+        
+        if (role == UserRole.ADMIN || loggedInUserId.equals(id)) {
+            scrapDealerService.deleteDealerById(id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
 }
+

@@ -11,7 +11,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,8 +38,22 @@ public class ScrapDealer {
     @Column(name = "first_name")
     private String firstName;
 
+    @Size(max = 20, message = "Last name should not exceed 20 characters")
+    @NotBlank(message = "Last name is required")
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Email(message = "Email format must be valid")
+    @NotBlank(message = "Email is required")
+    @Column(name = "email", unique = true)
+    private String email;
+
+    @Pattern(regexp = "^\\+65[689]\\d{7}$", message = "Phone number must be in the format"
+        + " +65 followed by 8 digits starting with 6, 8, or 9")
+    @NotBlank(message = "Phone number is required")
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @OneToMany(mappedBy = "scrapDealer", cascade = CascadeType.ALL)
     private List<Availability> availabilityList;
 }
-
-//i use this scrapdealer id and name to deperate them if got many teams
