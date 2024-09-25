@@ -48,21 +48,17 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     @Override
     public Availability updateAvailability(Long id, Availability availability, UUID loggedInUserId) {
-        // Validate if the availability exists
         Availability existingAvailability = availabilityRepository.findById(id)
                 .orElseThrow(() -> new AvailabilityNotFoundException("Availability not found"));
 
-        // Check if the logged-in user is the owner of the availability or has admin privileges
         if (!existingAvailability.getScrapDealer().getScrapDealerId().equals(loggedInUserId)) {
             throw new UnauthorizedAccessException("You are not allowed to modify this availability");
         }
 
-        // Additional validation (e.g., no past dates)
         if (availability.getAvailableDate().isBefore(LocalDate.now())) {
             throw new InvalidDateException("Available date cannot be in the past");
         }
 
-        // Update fields
         existingAvailability.setAvailableDate(availability.getAvailableDate());
         existingAvailability.setLocation(availability.getLocation());
 
@@ -71,16 +67,13 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     @Override
     public void deleteAvailability(Long id, UUID loggedInUserId) {
-        // Validate if the availability exists
         Availability availability = availabilityRepository.findById(id)
                 .orElseThrow(() -> new AvailabilityNotFoundException("Availability not found"));
 
-        // Check if the logged-in user is the owner of the availability or has admin privileges
         if (!availability.getScrapDealer().getScrapDealerId().equals(loggedInUserId)) {
             throw new UnauthorizedAccessException("You are not allowed to delete this availability");
         }
 
-        // Delete the availability
         availabilityRepository.delete(availability);
     }
 }

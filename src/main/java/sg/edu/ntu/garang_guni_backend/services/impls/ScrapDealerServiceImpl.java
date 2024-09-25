@@ -19,25 +19,22 @@ public class ScrapDealerServiceImpl implements ScrapDealerService {
 
     @Override
     public ScrapDealer createDealer(ScrapDealer scrapDealer) {
-        // Validate first name
         if (scrapDealer.getFirstName() == null || scrapDealer.getFirstName().isBlank()) {
             throw new IllegalArgumentException("First name is required.");
         }
-        
-        // Validate last name
+
         if (scrapDealer.getLastName() == null || scrapDealer.getLastName().isBlank()) {
             throw new IllegalArgumentException("Last name is required.");
         }
-    
-        // Validate email
+
         if (scrapDealer.getEmail() == null || scrapDealer.getEmail().isBlank()) {
             throw new IllegalArgumentException("Email is required.");
         }
+
         if (!scrapDealer.getEmail().matches("^\\S+@\\S+\\.\\S+$")) {
             throw new IllegalArgumentException("Email format is invalid.");
         }
-    
-        // Validate phone number
+        
         if (scrapDealer.getPhoneNumber() == null || scrapDealer.getPhoneNumber().isBlank()) {
             throw new IllegalArgumentException("Phone number is required.");
         }

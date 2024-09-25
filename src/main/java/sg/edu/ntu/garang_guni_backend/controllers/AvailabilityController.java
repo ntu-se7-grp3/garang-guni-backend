@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+// import org.springframework.security.core.Authentication;
+// import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import sg.edu.ntu.garang_guni_backend.entities.Availability;
 import sg.edu.ntu.garang_guni_backend.services.AvailabilityService;
@@ -25,11 +25,14 @@ public class AvailabilityController {
     public ResponseEntity<Availability> createAvailability(@PathVariable UUID scrapDealerId,
                                                            @Valid @RequestBody Availability availability) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String role = auth.getAuthorities().iterator().next().getAuthority();  // to check auth implementation
+        String role = auth.getAuthorities().iterator().next().getAuthority();
+        UUID loggedInUserId = (UUID) auth.getPrincipal();
+
         if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
             Availability createdAvailability = availabilityService.createAvailability(scrapDealerId, availability);
             return new ResponseEntity<>(createdAvailability, HttpStatus.CREATED);
         }
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
@@ -38,11 +41,13 @@ public class AvailabilityController {
                                                            @Valid @RequestBody Availability availability) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String role = auth.getAuthorities().iterator().next().getAuthority();
+        UUID loggedInUserId = (UUID) auth.getPrincipal();
 
         if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
-            Availability updatedAvailability = availabilityService.updateAvailability(id, availability);
+            Availability updatedAvailability = availabilityService.updateAvailability(id, availability, loggedInUserId);
             return ResponseEntity.status(HttpStatus.OK).body(updatedAvailability);
         }
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
@@ -50,18 +55,22 @@ public class AvailabilityController {
     public ResponseEntity<Void> deleteAvailability(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String role = auth.getAuthorities().iterator().next().getAuthority();
+        UUID loggedInUserId = (UUID) auth.getPrincipal();
 
         if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
-            availabilityService.deleteAvailability(id);
+            availabilityService.deleteAvailability(id, loggedInUserId);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Availability>> searchByDateAndLocation(
-            @RequestParam LocalDate date, @RequestParam String location) {
+    public ResponseEntity<List<Availability>> searchByDateAndLocation(@RequestParam LocalDate date, @RequestParam String location) {
         List<Availability> availabilities = availabilityService.findByDateAndLocation(date, location);
         return new ResponseEntity<>(availabilities, HttpStatus.OK);
     }
 }
+
+//When a user logs in or provides authentication, Spring Security updates the SecurityContextHolder with an Authentication object,
+// allowing it to be retrieved later in the application flow (such as in controllers or services).
