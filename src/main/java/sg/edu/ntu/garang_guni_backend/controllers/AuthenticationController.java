@@ -3,7 +3,6 @@ package sg.edu.ntu.garang_guni_backend.controllers;
 import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
-// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sg.edu.ntu.garang_guni_backend.entities.LoginRequest;
 import sg.edu.ntu.garang_guni_backend.entities.User;
 import sg.edu.ntu.garang_guni_backend.security.JwtTokenUtil;
 import sg.edu.ntu.garang_guni_backend.services.AuthenticationService;
@@ -20,10 +20,8 @@ import sg.edu.ntu.garang_guni_backend.services.AuthenticationService;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-
     private final JwtTokenUtil jwtTokenUtil;
 
-    // @Autowired // Constructor Injection
     public AuthenticationController(
             @Qualifier("authenticationServiceImpl") AuthenticationService authenticationService,
             JwtTokenUtil jwtTokenUtil) {
@@ -34,12 +32,27 @@ public class AuthenticationController {
     @PostMapping("/signup")
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody User user) {
         User newUser = authenticationService.signup(user);
-        String token = jwtTokenUtil.createToken(newUser);
+        return createTokenResponse(newUser, HttpStatus.CREATED);
+    }
 
-        // Return the token wrapped in a JSON object
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> authenticate(@RequestBody LoginRequest login) {
+        User authenticatedUser = authenticationService.authenticate(login);
+        return createTokenResponse(authenticatedUser, HttpStatus.OK);
+    }
+
+    /**
+     * Creates a response containing the JWT token.
+     *
+     * @param user   the authenticated or newly registered user
+     * @param status the HTTP status to return
+     * @return ResponseEntity with the token and status
+     */
+    private ResponseEntity<Map<String, String>> createTokenResponse(User user, HttpStatus status) {
+        String token = jwtTokenUtil.createToken(user);
         Map<String, String> response = new HashMap<String, String>();
         response.put("token", token);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(status).body(response);
     }
 }

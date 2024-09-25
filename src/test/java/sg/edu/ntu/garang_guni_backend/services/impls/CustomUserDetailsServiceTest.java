@@ -1,9 +1,13 @@
 package sg.edu.ntu.garang_guni_backend.services.impls;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,29 +42,36 @@ public class CustomUserDetailsServiceTest {
     @Test
     public void loadUserByUsernameTest() {
         // Arrange
-        when(userRepository.findByEmail("testuser@example.com")).thenReturn(user);
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
         // Act
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(
-            "testuser@example.com");
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getEmail());
 
         // Assert
+        assertNotNull(userDetails);
         assertEquals(user.getEmail(), userDetails.getUsername(), "User email should match");
         assertEquals(user.getPassword(), userDetails.getPassword(), "User password should match");
         assertEquals(1, userDetails.getAuthorities().size(), "User should have one role");
         assertEquals("ROLE_USER", userDetails.getAuthorities().iterator().next().getAuthority(),
                 "User role should be USER");
+
+        verify(userRepository, times(1)).findByEmail(user.getEmail());
     }
 
     @DisplayName("Load user by username - User not found")
     @Test
     public void loadInvalidUserByUsernameTest() {
         // Arrange
-        when(userRepository.findByEmail("unknown@example.com")).thenReturn(null);
+        String email = "nonexistent@example.com";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> {
-            customUserDetailsService.loadUserByUsername("unknown@example.com");
-        }, "Should throw UsernameNotFoundException when user is not found");
+        UsernameNotFoundException exception = assertThrows(
+                UsernameNotFoundException.class,
+                () -> customUserDetailsService.loadUserByUsername(email),
+                "Should throw UsernameNotFoundException when user is not found");
+        assertEquals("User not found with email: " + email, exception.getMessage());
+
+        verify(userRepository, times(1)).findByEmail(email);
     }
 }
