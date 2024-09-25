@@ -26,7 +26,6 @@ public class ContactServiceImplTest {
     @InjectMocks
     private ContactServiceImpl contactService;
 
-    // helper method to create a sample contact object
     private Contact createSampleContact() {
         Contact contact = new Contact();
         contact.setFirstName("Wong");
@@ -39,17 +38,15 @@ public class ContactServiceImplTest {
         return contact;
     }
 
-    // Test for successful contact creation
     @Test
     public void createContactTest() {
-        // Setup
+
         Contact contact = createSampleContact();
-        // Mock repo to return the saved contact
+
         when(contactRepository.save(contact)).thenReturn(contact); 
-        // Execute
+
         Contact savedContact = contactService.createContact(contact);
 
-        // Assert
         assertEquals(contact.getFirstName(), savedContact.getFirstName());
         assertEquals(contact.getLastName(), savedContact.getLastName());
         assertEquals(contact.getEmail(), savedContact.getEmail());
@@ -59,53 +56,45 @@ public class ContactServiceImplTest {
         verify(contactRepository, times(1)).save(contact);
     }
 
-    // Test for sanitization (removing dangerous content)
     @Test
     public void createContactWithSanitizationTest() {
 
         Contact contact = createSampleContact();
+
         contact.setMessageContent("Hello <script>alert('XSS');</script> World!");
 
-        // Mock the repository to return the saved contact after sanitization
         Contact sanitizedContact = createSampleContact();
         sanitizedContact.setMessageContent("Hello  World!");
         when(contactRepository.save(contact)).thenReturn(sanitizedContact);
 
-        // Execute the service call
         Contact savedContact = contactService.createContact(contact);
 
-        // Assert that the sanitized message content has no script tags
         assertEquals("Hello  World!", savedContact.getMessageContent());
         verify(contactRepository, times(1)).save(contact);
     }
 
-    // Test for validation exception when message content is empty after sanitization
     @Test
     public void createContactWithEmptyMessageAfterSanitizationTest() {
-        // Setup
+
         Contact contact = createSampleContact();
-        // Content that will be sanitized to empty
+
         contact.setMessageContent("<script>alert('XSS');</script>"); 
-        // Execute and expect ValidationException
+
         Exception exception = assertThrows(ValidationException.class, () -> {
             contactService.createContact(contact);
         });
 
-        // Assert
         assertEquals("Message content cannot be empty after sanitization", exception.getMessage());
     }
 
-    // Test to retrieve all contacts
     @Test
     public void getAllContactsTest() {
-        // Setup
+
         Contact contact = createSampleContact();
         when(contactRepository.findAll()).thenReturn(List.of(contact));
 
-        // Execute
         List<Contact> contacts = contactService.getAllContacts();
 
-        // Assert
         assertEquals(1, contacts.size(), "Should be 1 contact only in the list.");
         assertEquals(contact.getFirstName(), contacts.get(0).getFirstName());
         assertEquals(contact.getLastName(), contacts.get(0).getLastName());
@@ -115,16 +104,12 @@ public class ContactServiceImplTest {
         assertEquals(contact.getMessageContent(), contacts.get(0).getMessageContent());
     }
 
-    // Test for empty contact list, ensuring an empty list is returned
     @Test
     public void getEmptyContactsTest() {
-        // Setup - mock an empty list
         when(contactRepository.findAll()).thenReturn(Collections.emptyList());
 
-        // Execute
         List<Contact> contacts = contactService.getAllContacts();
 
-        // Assert
         assertEquals(0, contacts.size(), "This should be an empty list.");
     }
 }

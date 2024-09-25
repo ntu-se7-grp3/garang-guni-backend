@@ -24,18 +24,15 @@ public class GlobalExceptionHandlerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // Mocking the ContactService
     @MockBean
     private ContactService contactService;
 
     @Test
     @DisplayName("Test for handling ContactNotProcessingException")
-    public void testHandleContactNotProcessingException() throws Exception {
-        // Mock the service to throw ContactNotProcessingException
+    void testHandleContactNotProcessingException() throws Exception {
         doThrow(new ContactNotProcessingException("Processing error"))
                 .when(contactService).createContact(any(Contact.class));
 
-        // Perform a POST request to trigger the exception and expect a 500 Internal Server Error
         mockMvc.perform(MockMvcRequestBuilders.post("/contacts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"firstName\": \"Wang\", \"email\": \"wang@gmail.com\","
@@ -47,12 +44,10 @@ public class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("Test for handling generic exceptions")
-    public void testHandleGenericException() throws Exception {
-        // Mock the service to throw a RuntimeException to trigger the generic exception handler
+    void testHandleGenericException() throws Exception {
         doThrow(new RuntimeException("Unexpected error"))
                 .when(contactService).createContact(any(Contact.class));
 
-        // Perform a POST request to trigger the exception and expect a 500 Internal Server Error
         mockMvc.perform(MockMvcRequestBuilders.post("/contacts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"firstName\": \"Wang\", \"email\": \"wang@gmail.com\","
@@ -64,5 +59,3 @@ public class GlobalExceptionHandlerTest {
     }
 }
 
-// contactnotfound is only valid if want to search by id. so far we didnt
-// implement this yet

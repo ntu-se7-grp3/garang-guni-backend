@@ -50,8 +50,6 @@ public class ContactController {
         }
     }
     
-    
-
     // Read all contact forms
     @GetMapping({ "", "/" })
     public ResponseEntity<List<Contact>> getAllContacts() {

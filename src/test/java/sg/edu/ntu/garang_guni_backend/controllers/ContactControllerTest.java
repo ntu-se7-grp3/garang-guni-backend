@@ -24,13 +24,9 @@ public class ContactControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // @MockBean
-    // private ContactRepository contactRepository;
-
     @DisplayName("Test for creating a valid contact form")
     @Test
-    public void validContactCreationTest() throws Exception {
-        // create a valid contact object
+    void validContactCreationTest() throws Exception {
         Contact newContact = new Contact();
         newContact.setFirstName("Wang");
         newContact.setLastName("Wong");
@@ -39,15 +35,12 @@ public class ContactControllerTest {
         newContact.setSubject("Inquiry");
         newContact.setMessageContent("This is a test message.");
 
-        // convert to JSON
         String newContactAsJson = objectMapper.writeValueAsString(newContact);
 
-        // build post request
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(newContactAsJson);
 
-        // perform request and assert response
         mockMvc.perform(request)
             .andExpect(status().isCreated()) // expect 201
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -61,7 +54,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with empty First and Last Name")
     @Test
-    public void emptyNameContactCreationTest() throws Exception {
+    void emptyNameContactCreationTest() throws Exception {
         Contact emptyNameContact = new Contact();
         emptyNameContact.setFirstName(""); // empty first name
         emptyNameContact.setLastName(""); // empty last name
@@ -70,15 +63,12 @@ public class ContactControllerTest {
         emptyNameContact.setSubject("valid subject");
         emptyNameContact.setMessageContent("Message with valid content.");
 
-        // Convert to JSON
         String emptyNameContactAsJson = objectMapper.writeValueAsString(emptyNameContact);
 
-        // build post request
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(emptyNameContactAsJson);
 
-        // perform request and assert response
         mockMvc.perform(request)
             .andExpect(status().isBadRequest()); // expect 400 for invalid input
             // .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -87,7 +77,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating valid contact with first name only")
     @Test
-    public void validContactWithFirstNameOnlyTest() throws Exception {
+    void validContactWithFirstNameOnlyTest() throws Exception {
         Contact newContact = new Contact();
         newContact.setFirstName("Wang");
         newContact.setLastName("");
@@ -110,7 +100,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with long firstName")
     @Test
-    public void tooLongFirstNameContactCreationTest() throws Exception {
+    void tooLongFirstNameContactCreationTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("ThisNameIsDefinitelyWayTooLong");
         invalidContact.setLastName("Wong");
@@ -132,7 +122,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating valid contact with last name only")
     @Test
-    public void validContactWithLastNameOnlyTest() throws Exception {
+    void validContactWithLastNameOnlyTest() throws Exception {
         Contact newContact = new Contact();
         newContact.setFirstName("");
         newContact.setLastName("Wong");
@@ -155,7 +145,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with too long lastName")
     @Test
-    public void tooLongLastNameContactCreationTest() throws Exception {
+    void tooLongLastNameContactCreationTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("ThisLastNameIsWayTooLongToBeValid");
@@ -177,8 +167,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with empty phoneNumber and email")
     @Test
-    public void emptyPhoneAndEmailContactCreationTest() throws Exception {
-        // create invalid contact object (both phoneNumber and email are empty)
+    void emptyPhoneAndEmailContactCreationTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
@@ -187,15 +176,12 @@ public class ContactControllerTest {
         invalidContact.setSubject("Inquiry");
         invalidContact.setMessageContent("Test message.");
 
-        // convert to JSON
         String invalidContactAsJson = objectMapper.writeValueAsString(invalidContact);
 
-        // build post request
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(invalidContactAsJson);
 
-        // perform request and assert response
         mockMvc.perform(request)
             .andExpect(status().isBadRequest()) // expect 400 for missing phone/email
             .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -205,7 +191,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with invalid phone number")
     @Test
-    public void invalidPhoneNumberContactCreationTest() throws Exception {
+    void invalidPhoneNumberContactCreationTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
@@ -227,7 +213,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with invalid email")
     @Test
-    public void invalidEmailContactCreationTest() throws Exception {
+    void invalidEmailContactCreationTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
@@ -249,7 +235,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with empty subject")
     @Test
-    public void emptySubjectContactCreationTest() throws Exception {
+    void emptySubjectContactCreationTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
@@ -272,7 +258,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with too long subject")
     @Test
-    public void tooLongSubjectContactCreationTest() throws Exception {
+    void tooLongSubjectContactCreationTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
@@ -294,7 +280,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with empty messageContent")
     @Test
-    public void emptyMessageContentContactCreationTest() throws Exception {
+    void emptyMessageContentContactCreationTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
@@ -317,7 +303,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with very long message content")
     @Test
-    public void longMessageContentTest() throws Exception {
+    void longMessageContentTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
@@ -343,7 +329,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with empty request body")
     @Test
-    public void emptyContactRequestTest() throws Exception {
+    void emptyContactRequestTest() throws Exception {
         String emptyContactAsJson = "{}";
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
@@ -357,7 +343,7 @@ public class ContactControllerTest {
 
     @DisplayName("Test creating contact with XSS attack in message content")
     @Test
-    public void xssAttackOnlyMessageContentTest() throws Exception {
+    void xssAttackOnlyMessageContentTest() throws Exception {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
