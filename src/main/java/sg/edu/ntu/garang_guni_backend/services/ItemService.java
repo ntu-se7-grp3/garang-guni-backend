@@ -3,10 +3,15 @@ package sg.edu.ntu.garang_guni_backend.services;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
+import sg.edu.ntu.garang_guni_backend.entities.Booking;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 
 public interface ItemService {
     Item createItem(Item item);
+
+    Item assignBookingToNewItem(Item newItem, Booking booking);
+
+    Item assignBookingToExistingItem(UUID itemId, Booking booking);
 
     Item getItemById(UUID id);
 
@@ -14,7 +19,7 @@ public interface ItemService {
     
     Item deleteItem(UUID id);
 
-    UUID addImageToItem(UUID id, MultipartFile newImage);
+    UUID addNewImageToItem(UUID id, MultipartFile newImage);
 
     List<String> getAllImages(UUID id);
 }

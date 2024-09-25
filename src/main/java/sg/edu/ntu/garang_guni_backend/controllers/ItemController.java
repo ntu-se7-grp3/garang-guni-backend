@@ -59,7 +59,7 @@ public class ItemController {
     public ResponseEntity<UUID> addImageToItem(
             @PathVariable UUID id,
             @RequestParam("image") MultipartFile newImage) {
-        UUID newImageId = itemService.addImageToItem(id, newImage);
+        UUID newImageId = itemService.addNewImageToItem(id, newImage);
         return ResponseEntity.status(HttpStatus.CREATED).body(newImageId);
     }
 

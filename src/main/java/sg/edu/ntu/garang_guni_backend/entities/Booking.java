@@ -1,5 +1,6 @@
 package sg.edu.ntu.garang_guni_backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,9 +16,6 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,11 +35,11 @@ public class Booking {
         this(
             bookingToBeClone.getBookingId(),
             bookingToBeClone.getUserId(),
-            bookingToBeClone.getBookingDate(),
-            bookingToBeClone.getPickupDate(),
+            bookingToBeClone.getBookingDateTime(),
+            bookingToBeClone.getAppointmentDateTime(),
             bookingToBeClone.getLocation(),
-            bookingToBeClone.getItem(),
-            bookingToBeClone.isCollectionAddressSameAsRegistered(),
+            bookingToBeClone.getItems(),
+            bookingToBeClone.isLocationSameAsRegistered(),
             bookingToBeClone.getCollectionType(),
             bookingToBeClone.getPaymentMethod(),
             bookingToBeClone.getRemarks()
@@ -55,9 +53,9 @@ public class Booking {
 
     private String userId;
 
-    private LocalDateTime bookingDate;
+    private LocalDateTime bookingDateTime;
 
-    private LocalDateTime pickupDate;
+    private LocalDateTime appointmentDateTime;
 
     @ManyToOne
     @JoinColumn(name = "locationId", referencedColumnName = "locationId")
@@ -65,9 +63,9 @@ public class Booking {
 
     @JsonBackReference
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
-    private List<Item> item;
+    private List<Item> items;
 
-    private boolean isCollectionAddressSameAsRegistered;
+    private boolean isLocationSameAsRegistered;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "collection_type")
@@ -78,5 +76,4 @@ public class Booking {
     private PaymentMethod paymentMethod;
 
     private String remarks;
-
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import sg.edu.ntu.garang_guni_backend.entities.Booking;
 import sg.edu.ntu.garang_guni_backend.entities.Image;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.exceptions.item.ItemNotFoundException;
@@ -27,12 +28,34 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item createItem(Item item) {
-        Item cloneItem = Item.builder()
-                            .itemName(item.getItemName())
-                            .itemDescription(item.getItemDescription())
-                            .build();
-        itemRepository.save(cloneItem);
-        return cloneItem;
+        Item createdItem = createItemBase(item);
+        itemRepository.save(createdItem);
+        return new Item(createdItem);
+    }
+
+    @Override
+    public Item assignBookingToNewItem(Item newItem, Booking booking) {
+        Item createdItem = createItemBase(newItem);
+        createdItem.setBooking(booking);
+        itemRepository.save(createdItem);
+
+        return new Item(createdItem);
+    }
+
+    @Override
+    public Item assignBookingToExistingItem(UUID itemId, Booking booking) {
+        Item retrievedItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException(itemId));
+        retrievedItem.setBooking(booking);
+
+        return new Item(itemRepository.save(retrievedItem));
+    }
+
+    private Item createItemBase(Item item) {
+        return Item.builder()
+                .itemName(item.getItemName())
+                .itemDescription(item.getItemDescription())
+                .build();
     }
 
     @Override
@@ -65,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public UUID addImageToItem(UUID id, MultipartFile file) {
+    public UUID addNewImageToItem(UUID id, MultipartFile file) {
         Item selectedItem = itemRepository
                 .findById(id)
                 .orElseThrow(() -> new ItemNotFoundException(id));

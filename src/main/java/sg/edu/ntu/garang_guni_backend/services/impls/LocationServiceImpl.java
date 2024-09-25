@@ -3,7 +3,6 @@ package sg.edu.ntu.garang_guni_backend.services.impls;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
-
 import sg.edu.ntu.garang_guni_backend.entities.Location;
 import sg.edu.ntu.garang_guni_backend.exceptions.location.LocationNotFoundException;
 import sg.edu.ntu.garang_guni_backend.repositories.LocationRepository;
@@ -25,7 +24,7 @@ public class LocationServiceImpl implements LocationService {
                 .latitude(newLocation.getLatitude())
                 .longitude(newLocation.getLongitude())
                 .build();
-        return locationRepository.save(cloneLocation);
+        return new Location(locationRepository.save(cloneLocation));
     }
 
     @Override

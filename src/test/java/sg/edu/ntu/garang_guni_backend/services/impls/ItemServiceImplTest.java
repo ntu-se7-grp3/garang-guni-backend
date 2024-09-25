@@ -180,7 +180,7 @@ class ItemServiceImplTest {
         when(imgService.uploadImageAndAssignItemId(sampleItem, imgFile))
                 .thenReturn(uploadedImgId);
 
-        UUID result = itemService.addImageToItem(itemId, imgFile);
+        UUID result = itemService.addNewImageToItem(itemId, imgFile);
 
         assertEquals(uploadedImgId, result, 
                 "The returned ID should match the generated image ID");
@@ -195,7 +195,7 @@ class ItemServiceImplTest {
     void addImageToNonExistantItemTest() {
         when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
         assertThrows(ItemNotFoundException.class, 
-                () -> itemService.addImageToItem(itemId, imgFile));
+                () -> itemService.addNewImageToItem(itemId, imgFile));
     }
 
     @DisplayName("Get All Images - Successful")
