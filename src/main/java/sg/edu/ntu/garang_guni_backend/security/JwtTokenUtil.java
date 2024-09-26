@@ -51,6 +51,7 @@ public class JwtTokenUtil {
 
         return Jwts.builder()
                 .setClaims(claims)
+                .setIssuedAt(tokenCreateTime)
                 .setExpiration(tokenValidity)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
