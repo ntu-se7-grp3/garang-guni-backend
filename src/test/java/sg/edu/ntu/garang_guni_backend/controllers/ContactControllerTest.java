@@ -71,8 +71,6 @@ public class ContactControllerTest {
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest()); // expect 400 for invalid input
-            // .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            // .andExpect(jsonPath("$.message").exists());
     }
 
     @DisplayName("Test creating valid contact with first name only")
@@ -185,8 +183,6 @@ public class ContactControllerTest {
         mockMvc.perform(request)
             .andExpect(status().isBadRequest()) // expect 400 for missing phone/email
             .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-            // .andExpect(jsonPath("$.message").value(
-            // "Either email or phone number must be provided."));
     }
 
     @DisplayName("Test creating contact with invalid phone number")
@@ -351,7 +347,6 @@ public class ContactControllerTest {
         invalidContact.setPhoneNumber("+6592345678");
         invalidContact.setSubject("Inquiry");
     
-        // Message content with only a script tag (will be empty after sanitization)
         invalidContact.setMessageContent("<script>alert('XSS');</script>");
     
         String invalidContactAsJson = objectMapper.writeValueAsString(invalidContact);
@@ -362,7 +357,5 @@ public class ContactControllerTest {
     
         mockMvc.perform(request)
             .andExpect(status().isBadRequest());  // Expect 400
-            // .andExpect(jsonPath("$.message").value(
-            //"Message content cannot be empty after sanitization"));  // will be null
     }
 }

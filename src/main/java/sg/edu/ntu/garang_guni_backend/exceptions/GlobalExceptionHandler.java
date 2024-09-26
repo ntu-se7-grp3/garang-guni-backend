@@ -17,7 +17,6 @@ public class GlobalExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // Handle ContactNotFoundException
     @ExceptionHandler(ContactNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleContactNotFoundException(
         ContactNotFoundException ex) {
@@ -26,7 +25,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND); // 404
     }
 
-    // Handle ContactNotProcessingException
     @ExceptionHandler(ContactNotProcessingException.class)
     public ResponseEntity<ErrorResponse> handleContactNotProcessingException(
             ContactNotProcessingException ex) {
@@ -35,7 +33,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500
     }
 
-    // Handle validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
         MethodArgumentNotValidException ex) {
@@ -49,7 +46,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
     }
 
-    // Handle validation exception
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex) {
         logger.warn("Validation failed: {}", ex.getMessage());
@@ -57,7 +53,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
     }
 
-    // Handle generic exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         logger.error("Unexpected Error: ", ex);

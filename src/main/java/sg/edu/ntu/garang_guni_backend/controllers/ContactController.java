@@ -28,13 +28,6 @@ public class ContactController {
         this.contactService = contactService;
     }
 
-    //Create contact form
-    // @PostMapping({ "", "/" })
-    // public ResponseEntity<Contact> createContact(@Valid @RequestBody Contact contact) {
-    //     Contact savedContact = contactService.createContact(contact);
-    //     return new ResponseEntity<>(savedContact, HttpStatus.CREATED);
-    // }
-
     @PostMapping({ "", "/" })
     public ResponseEntity<?> createContact(@Valid @RequestBody Contact contact) {
         try {
@@ -50,7 +43,6 @@ public class ContactController {
         }
     }
     
-    // Read all contact forms
     @GetMapping({ "", "/" })
     public ResponseEntity<List<Contact>> getAllContacts() {
         List<Contact> allContacts = contactService.getAllContacts();
