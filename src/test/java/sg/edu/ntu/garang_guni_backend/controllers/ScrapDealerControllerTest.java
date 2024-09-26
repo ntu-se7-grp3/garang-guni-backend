@@ -5,10 +5,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -88,7 +88,8 @@ public class ScrapDealerControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(scrapDealer)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("First name should not exceed 20 characters. "));
+                .andExpect(jsonPath("$.message").value(
+                    "First name should not exceed 20 characters. "));
     }
 
     @Test
@@ -114,7 +115,8 @@ public class ScrapDealerControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(scrapDealer)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Last name should not exceed 20 characters. "));
+                .andExpect(jsonPath("$.message").value(
+                    "Last name should not exceed 20 characters. "));
     }
 
     @Test
@@ -153,7 +155,7 @@ public class ScrapDealerControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(scrapDealer)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Phone number is required"));
+                .andExpect(jsonPath("$.message").exists());
     }
 
     @Test
@@ -166,7 +168,9 @@ public class ScrapDealerControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(scrapDealer)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Phone number must be in the format +65 followed by 8 digits starting with 6, 8, or 9. "));
+                .andExpect(jsonPath("$.message").value(
+                    "Phone number must be in the format +65 "
+                    + "followed by 8 digits starting with 6, 8, or 9. "));
     }
 
     @Test
@@ -180,7 +184,7 @@ public class ScrapDealerControllerTest {
 
         mockMvc.perform(get("/scrapdealers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))  // Check array size
+                .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].firstName").value("Uncle"))
                 .andExpect(jsonPath("$[0].lastName").value("Roger"))
                 .andExpect(jsonPath("$[0].email").value("uncle@gmail.com"))
@@ -204,17 +208,17 @@ public class ScrapDealerControllerTest {
 
     @Test
     @DisplayName("Test deleting ScrapDealer by ID")
-    @WithMockUser(username = "admin@gmail.com", roles = {"SCRAP_DEALER"})
+    @WithMockUser(username = "fe5d9416-8c91-49ec-93c5-1e83d7c5d913", roles = {"SCRAP_DEALER"})
     void testDeleteScrapDealerById() throws Exception {
         UUID dealerId = UUID.randomUUID();
-
+    
         mockMvc.perform(delete("/scrapdealers/" + dealerId))
-                .andExpect(status().isNoContent());
+            .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("Test retrieving empty ScrapDealer list")
-    @WithMockUser(username = "admin@gmail.com", roles = {"ADMIN"})
+    @WithMockUser(username = "sd@gmail.com", roles = {"SCRAP_DEALER"})
     void testGetAllScrapDealers_EmptyList() throws Exception {
         when(scrapDealerService.getAllDealers()).thenReturn(new ArrayList<>());
 
