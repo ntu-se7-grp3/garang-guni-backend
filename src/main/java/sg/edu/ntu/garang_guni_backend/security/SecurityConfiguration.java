@@ -27,7 +27,7 @@ public class SecurityConfiguration {
     public SecurityConfiguration(
         CustomUserDetailsService customUserDetailsService,
         JwtTokenFilter jwtTokenFilter
-        ) {            
+    ) {            
         this.customUserDetailsService = customUserDetailsService;
         this.jwtTokenFilter = jwtTokenFilter;
     }
