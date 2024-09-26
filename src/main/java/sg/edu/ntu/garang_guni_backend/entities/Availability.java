@@ -24,21 +24,34 @@ public class Availability {
     @FutureOrPresent(message = "Available date must be today or in the future")
     private LocalDate availableDate;
 
-    // Many-to-One relationship with Location
     @ManyToOne
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;
 
-    // Many-to-One relationship with ScrapDealer
     @ManyToOne
     @JoinColumn(name = "scrap_dealer_id")
     @JsonBackReference
     private ScrapDealer scrapDealer;
 
-    // Constructor to initialize all fields
     public Availability(LocalDate availableDate, Location location, ScrapDealer scrapDealer) {
         this.availableDate = availableDate;
-        this.location = location;
-        this.scrapDealer = scrapDealer;
+        this.location = new Location(location);
+        this.scrapDealer = new ScrapDealer(scrapDealer);
+    }
+
+    public Location getLocation() {
+        return new Location(location);
+    }
+
+    public void setLocation(Location location) {
+        this.location = new Location(location);
+    }
+
+    public ScrapDealer getScrapDealer() {
+        return new ScrapDealer(scrapDealer);
+    }
+
+    public void setScrapDealer(ScrapDealer scrapDealer) {
+        this.scrapDealer = new ScrapDealer(scrapDealer);
     }
 }

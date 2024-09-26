@@ -36,4 +36,11 @@ public class Location {
     @DecimalMin(value = "-180.0", message = "Longitude must be between -180 and 180")
     @DecimalMax(value = "180.0", message = "Longitude must be between -180 and 180")
     private Double longitude;
+
+    public Location(Location location) {
+        this.id = location.id;
+        this.name = location.name;
+        this.latitude = location.latitude;
+        this.longitude = location.longitude;
+    }
 }
