@@ -95,11 +95,18 @@ public class AvailabilityControllerTest {
     @DisplayName("Test Updating Availability Location")
     @WithMockUser(username = "scrapdealer", roles = {"SCRAP_DEALER"})
     void testUpdatingAvailabilityAndCheckScrapDealerLink() throws Exception {
-        location.setName("Updated Location");
-
+        Location updatedLocation = new Location();
+        updatedLocation.setId(1L);
+        updatedLocation.setName("Updated Location");
+        updatedLocation.setLatitude(1.3521);
+        updatedLocation.setLongitude(103.8198);
+        
+        availability.setLocation(updatedLocation);
+    
+        when(locationService.getLocationById(1L)).thenReturn(updatedLocation);
         when(availabilityService.updateAvailability(anyLong(), any(Availability.class)))
             .thenReturn(availability);
-
+    
         mockMvc.perform(put("/availability/{id}", 1L)
                 .param("locationId", "1")
                 .contentType(MediaType.APPLICATION_JSON)
