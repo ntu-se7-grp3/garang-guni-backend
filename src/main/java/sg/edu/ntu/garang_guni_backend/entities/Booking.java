@@ -13,6 +13,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -55,10 +57,13 @@ public class Booking {
     @Column(name = "bookingId")
     private UUID bookingId;
 
+    @NotBlank(message = "User ID is mandatory!")
     private String userId;
 
+    @NotNull(message = "Booking date and time are mandatory!")
     private LocalDateTime bookingDateTime;
 
+    @NotNull(message = "Appointment date and time are mandatory!")
     private LocalDateTime appointmentDateTime;
 
     @ManyToOne
