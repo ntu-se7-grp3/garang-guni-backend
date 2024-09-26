@@ -20,8 +20,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "scrap_dealer_Availability")
 public class Availability {
@@ -42,4 +42,14 @@ public class Availability {
     @JoinColumn(name = "scrap_dealer_id")
     @JsonBackReference
     private ScrapDealer scrapDealer;
+
+    // Getter with defensive copy
+    public ScrapDealer getScrapDealer() {
+        return (this.scrapDealer != null) ? new ScrapDealer(this.scrapDealer) : null;
+    }
+
+    // Setter with defensive copy
+    public void setScrapDealer(ScrapDealer scrapDealer) {
+        this.scrapDealer = (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
+    }
 }
