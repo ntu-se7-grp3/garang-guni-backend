@@ -1,6 +1,9 @@
 package sg.edu.ntu.garang_guni_backend.controllers;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,10 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import sg.edu.ntu.garang_guni_backend.entities.Availability;
 import sg.edu.ntu.garang_guni_backend.services.AvailabilityService;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/availability")
 public class AvailabilityController {
@@ -22,13 +21,14 @@ public class AvailabilityController {
     private AvailabilityService availabilityService;
 
     @PostMapping("/{scrapDealerId}")
-    public ResponseEntity<Availability> createAvailability(@PathVariable UUID scrapDealerId,
-                                                           @Valid @RequestBody Availability availability) {
+    public ResponseEntity<Availability> createAvailability(
+        @PathVariable UUID scrapDealerId, @Valid @RequestBody Availability availability) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String role = auth.getAuthorities().iterator().next().getAuthority();
-        
+
         if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
-            Availability createdAvailability = availabilityService.createAvailability(scrapDealerId, availability);
+            Availability createdAvailability = availabilityService.createAvailability(
+                scrapDealerId, availability);
             return new ResponseEntity<>(createdAvailability, HttpStatus.CREATED);
         }
 
@@ -36,25 +36,40 @@ public class AvailabilityController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Availability> updateAvailability(@PathVariable Long id,
-                                                           @Valid @RequestBody Availability availability) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String role = auth.getAuthorities().iterator().next().getAuthority();
-        UUID loggedInUserId = (UUID) auth.getPrincipal();
-
-        if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
-            Availability updatedAvailability = availabilityService.updateAvailability(id, availability, loggedInUserId);
-            return ResponseEntity.status(HttpStatus.OK).body(updatedAvailability);
-        }
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<Availability> updateAvailability(
+        @PathVariable Long id, @Valid @RequestBody Availability availability) {
+        Availability updatedAvailability = availabilityService.updateAvailability(id, availability);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedAvailability);
     }
+
+    // @PutMapping("/{id}")
+    // public ResponseEntity<Availability> updateAvailability(
+    //      @PathVariable Long id, @Valid @RequestBody Availability availability) {
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //     String role = auth.getAuthorities().iterator().next().getAuthority();
+    //     String loggedInUserIdString = auth.getName();
+    
+    //     try {
+    //         UUID loggedInUserId = UUID.fromString(loggedInUserIdString);
+            
+    //         if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
+    //             Availability updatedAvailability = availabilityService.updateAvailability(
+    //                  id, availability, loggedInUserId);
+    //             return ResponseEntity.status(HttpStatus.OK).body(updatedAvailability);
+    //         }
+    //     } catch (IllegalArgumentException e) {
+    //         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+    //     }
+    
+    //     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    // }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAvailability(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String role = auth.getAuthorities().iterator().next().getAuthority();
-        UUID loggedInUserId = (UUID) auth.getPrincipal();
+        String loggedInUserIdString = auth.getName();
+        UUID loggedInUserId = UUID.fromString(loggedInUserIdString);
 
         if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
             availabilityService.deleteAvailability(id, loggedInUserId);
@@ -65,11 +80,11 @@ public class AvailabilityController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Availability>> searchByDateAndLocation(@RequestParam LocalDate date, @RequestParam String location) {
-        List<Availability> availabilities = availabilityService.findByDateAndLocation(date, location);
+    public ResponseEntity<List<Availability>> searchByDateAndLocation(
+        @RequestParam LocalDate date, @RequestParam String location) {
+
+        List<Availability> availabilities = availabilityService.findByDateAndLocation(
+            date, location);
         return new ResponseEntity<>(availabilities, HttpStatus.OK);
     }
 }
-
-//When a user logs in or provides authentication, Spring Security updates the SecurityContextHolder with an Authentication object,
-// allowing it to be retrieved later in the application flow (such as in controllers or services).
