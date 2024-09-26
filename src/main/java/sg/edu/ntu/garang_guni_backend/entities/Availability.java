@@ -1,5 +1,6 @@
 package sg.edu.ntu.garang_guni_backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,7 +12,6 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,5 +40,6 @@ public class Availability {
 
     @ManyToOne
     @JoinColumn(name = "scrap_dealer_id")
+    @JsonBackReference
     private ScrapDealer scrapDealer;
 }
