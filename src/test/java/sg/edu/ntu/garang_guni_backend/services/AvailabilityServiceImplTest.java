@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import sg.edu.ntu.garang_guni_backend.entities.Availability;
+import sg.edu.ntu.garang_guni_backend.entities.Location;
 import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
 import sg.edu.ntu.garang_guni_backend.exceptions.InvalidDateException;
 import sg.edu.ntu.garang_guni_backend.exceptions.UnauthorizedAccessException;
@@ -35,6 +36,7 @@ public class AvailabilityServiceImplTest {
 
     private Availability availability;
     private ScrapDealer scrapDealer;
+    private Location mockLocation;
 
     @BeforeEach
     void setUp() {
@@ -43,9 +45,15 @@ public class AvailabilityServiceImplTest {
         scrapDealer = new ScrapDealer();
         scrapDealer.setScrapDealerId(UUID.randomUUID());
 
+        mockLocation = new Location();
+        mockLocation.setId(1L);
+        mockLocation.setName("Test Location");
+        mockLocation.setLatitude(1.3521);
+        mockLocation.setLongitude(103.8198);
+
         availability = new Availability();
         availability.setAvailableDate(LocalDate.now().plusDays(1));
-        availability.setLocation("Test Location");
+        availability.setLocation(mockLocation);
         availability.setScrapDealer(scrapDealer);
     }
 
@@ -60,32 +68,16 @@ public class AvailabilityServiceImplTest {
             scrapDealer.getScrapDealerId(), availability));
     }
 
-
     @Test
     @DisplayName("Test Updating Availability Date Successfully")
     void testUpdateAvailabilityDate() {
         when(availabilityRepository.findById(anyLong())).thenReturn(Optional.of(availability));
         when(availabilityRepository.save(any(Availability.class))).thenReturn(availability);
 
-        // Availability updatedAvailability = availabilityService.updateAvailability(
-        //      1L, availability, scrapDealer.getScrapDealerId());
         Availability updatedAvailability = availabilityService.updateAvailability(1L, availability);
-
 
         assertEquals(LocalDate.now().plusDays(1), updatedAvailability.getAvailableDate());
     }
-
-    // @Test
-    // @DisplayName("Test Unauthorized Access when Updating Availability")
-    // void testUnauthorizedAccessForUpdate() {
-    //     UUID unauthorizedUserId = UUID.randomUUID();
-    //     when(availabilityRepository.findById(anyLong())).thenReturn(Optional.of(availability));
-
-    //     assertThrows(UnauthorizedAccessException.class, () -> 
-                //availabilityService.updateAvailability(1L, availability, unauthorizedUserId));
-    //     assertThrows(UnauthorizedAccessException.class, () -> 
-                //availabilityService.updateAvailability(1L, availability, unauthorizedUserId));
-    // }
 
     @Test
     @DisplayName("Test Deleting Availability")
@@ -94,7 +86,7 @@ public class AvailabilityServiceImplTest {
 
         availabilityService.deleteAvailability(1L, scrapDealer.getScrapDealerId());
 
-        verify(availabilityRepository, times(1)).delete(availability);
+        verify(availabilityRepository, times(1)).deleteById(1L);
     }
 
     @Test
