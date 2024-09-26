@@ -3,9 +3,10 @@ package sg.edu.ntu.garang_guni_backend.services.impls;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sg.edu.ntu.garang_guni_backend.entities.User;
+import sg.edu.ntu.garang_guni_backend.exceptions.UserExistsException;
 import sg.edu.ntu.garang_guni_backend.exceptions.UserNotFoundException;
 import sg.edu.ntu.garang_guni_backend.repositories.UserRepository;
 import sg.edu.ntu.garang_guni_backend.services.UserService;
@@ -15,10 +16,13 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(
+        PasswordEncoder passwordEncoder,
+        UserRepository userRepository) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
@@ -30,13 +34,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(UUID id, User user) {
-        logger.info("Updating user with id {}", id);
+        String email = user.getEmail();
+        logger.info("Attempting to update user with id {}", id);
+
+        if (userRepository.existsByEmail(email)) {
+            logger.error("User with email {} already exists", email);
+            throw new UserExistsException(email);
+        }
+
         User dbUser = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 
         dbUser.setFirstName(user.getFirstName());
         dbUser.setLastName(user.getLastName());
-        dbUser.setEmail(user.getEmail());
-        dbUser.setPassword(user.getPassword());
+        dbUser.setEmail(email);
+
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        dbUser.setPassword(encodedPassword);
         dbUser.setContactNo(user.getContactNo());
         dbUser.setDob(user.getDob());
         dbUser.setGender(user.getGender());
@@ -44,6 +57,8 @@ public class UserServiceImpl implements UserService {
         dbUser.setAddress(user.getAddress());
         dbUser.setFloor(user.getFloor());
         dbUser.setUnitNumber(user.getUnitNumber());
+
+        logger.info("Successfully updated user with email: {}", email);
 
         return userRepository.save(dbUser);
     }

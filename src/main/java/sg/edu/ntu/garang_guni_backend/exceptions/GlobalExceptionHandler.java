@@ -24,7 +24,12 @@ public class GlobalExceptionHandler {
      * @param exception the exception that was thrown
      * @return a ResponseEntity containing the error message and a 404 Not Found status
      */
-    @ExceptionHandler(UsernameNotFoundException.class)
+    @ExceptionHandler(
+        {
+            UserNotFoundException.class,
+            UsernameNotFoundException.class 
+        }
+    )
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
         RuntimeException exception) {
         ErrorResponse errorResponse = new ErrorResponse(
