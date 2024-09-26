@@ -10,7 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+// import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import sg.edu.ntu.garang_guni_backend.services.impls.CustomUserDetailsService;
 
 @Configuration
@@ -20,7 +20,9 @@ public class SecurityConfiguration {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtTokenFilter jwtTokenFilter;
 
-    public SecurityConfiguration(CustomUserDetailsService customUserDetailsService, JwtTokenFilter jwtTokenFilter) {            
+    public SecurityConfiguration(
+        CustomUserDetailsService customUserDetailsService, 
+            JwtTokenFilter jwtTokenFilter) {            
         this.customUserDetailsService = customUserDetailsService;
         this.jwtTokenFilter = jwtTokenFilter;
     }
@@ -31,24 +33,29 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
+    AuthenticationManager authenticationManager(
+        HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http
                 .getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder);
+        authenticationManagerBuilder.userDetailsService(customUserDetailsService)
+                                    .passwordEncoder(passwordEncoder);
         return authenticationManagerBuilder.build();
     }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-            .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(management -> management.sessionCreationPolicy(
+                SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/scrapdealers/**").hasAuthority("ROLE_SCRAP_DEALER") 
-                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN") 
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                // .requestMatchers("/auth/**").permitAll()
+                // .requestMatchers("/scrapdealers/**").hasAuthority("ROLE_SCRAP_DEALER") 
+                // .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN") 
+                // .anyRequest().authenticated()
+                .anyRequest().permitAll() // Allow all requests without authentication
+
+            );
+            // .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
     
         return http.build();
     }
