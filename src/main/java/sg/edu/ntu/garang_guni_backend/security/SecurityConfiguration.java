@@ -1,5 +1,6 @@
 package sg.edu.ntu.garang_guni_backend.security;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +19,8 @@ import sg.edu.ntu.garang_guni_backend.services.impls.CustomUserDetailsService;
 public class SecurityConfiguration {
 
     private final CustomUserDetailsService customUserDetailsService;
+
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     private final JwtTokenFilter jwtTokenFilter;
 
     public SecurityConfiguration(
