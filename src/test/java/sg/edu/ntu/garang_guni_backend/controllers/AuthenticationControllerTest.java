@@ -131,7 +131,7 @@ class AuthenticationControllerTest {
         
         // Arrange
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail("john.doe@example.com");
+        loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("P@ssword123");
 
         String loginRequestAsJson = objectMapper.writeValueAsString(loginRequest);
