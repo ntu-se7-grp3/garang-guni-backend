@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
 import sg.edu.ntu.garang_guni_backend.entities.Booking;
+import sg.edu.ntu.garang_guni_backend.entities.Image;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 
 public interface ItemService {
@@ -26,4 +27,6 @@ public interface ItemService {
     List<UUID> addAllNewImageToItem(UUID itemId, List<MultipartFile> images);
 
     List<String> getAllImages(UUID id);
+
+    List<Image> getAllImagesDetails(UUID id);
 }

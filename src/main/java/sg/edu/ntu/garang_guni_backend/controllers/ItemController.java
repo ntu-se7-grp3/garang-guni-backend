@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import sg.edu.ntu.garang_guni_backend.entities.Image;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.services.ItemService;
 
@@ -74,5 +75,11 @@ public class ItemController {
     @GetMapping("/{id}/images")
     public ResponseEntity<List<String>> viewAllImages(@PathVariable UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getAllImages(id));
+    }
+
+    @GetMapping("/{id}/images/details")
+    public ResponseEntity<List<Image>> viewAllImagesDetails(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(itemService.getAllImagesDetails(id));
     }
 }

@@ -128,4 +128,18 @@ public class ItemServiceImpl implements ItemService {
                             .toList()
             : null;
     }
+
+    @Override
+    public List<Image> getAllImagesDetails(UUID id) {
+        Item selectedItem = itemRepository
+                .findById(id)
+                .orElseThrow(() -> new ItemNotFoundException(id));
+
+        return (!selectedItem.getImages().isEmpty())
+            ? selectedItem.getImages()
+                            .stream()
+                            .map(Image::new)
+                            .toList()
+            : null;
+    }
 }
