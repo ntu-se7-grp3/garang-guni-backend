@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,8 +35,16 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    @PostMapping({ "", "/" })
-    public ResponseEntity<Booking> createBooking(
+    @PostMapping(value = { "", "/" }, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Booking> createBookingJson(
+            @Valid @RequestBody BookingRequest newBookingRequest) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(bookingService.createBooking(newBookingRequest));
+    }
+
+    @PostMapping(value = { "", "/" }, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Booking> createBookingModelAttr(
             @Valid @ModelAttribute BookingRequest newBookingRequest) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
