@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -60,7 +59,7 @@ public class ScrapDealerServiceImplTest {
 
     @Test
     public void createInvalidDealerTest() {
-        sampleDealer.setFirstName(null); // Invalid first name
+        sampleDealer.setFirstName(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             scrapDealerService.createDealer(sampleDealer);
@@ -106,9 +105,10 @@ public class ScrapDealerServiceImplTest {
     public void getScrapDealerByInvalidIdTest() {
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-        ScrapDealerNotFoundException exception = assertThrows(ScrapDealerNotFoundException.class, () -> {
-            scrapDealerService.getScrapDealerById(scrapDealerId);
-        });
+        ScrapDealerNotFoundException exception = 
+            assertThrows(ScrapDealerNotFoundException.class, () -> {
+                scrapDealerService.getScrapDealerById(scrapDealerId);
+            });
 
         assertEquals("Scrap dealer not found with id: " + scrapDealerId, exception.getMessage());
         verify(scrapDealerRepository, times(1)).findById(any(UUID.class));
@@ -120,7 +120,8 @@ public class ScrapDealerServiceImplTest {
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(sampleDealer));
         when(scrapDealerRepository.save(any(ScrapDealer.class))).thenReturn(sampleDealer);
 
-        ScrapDealer updatedDealer = scrapDealerService.updateScrapDealer(scrapDealerId, sampleDealer, loggedInUserId);
+        ScrapDealer updatedDealer = scrapDealerService.updateScrapDealer(
+            scrapDealerId, sampleDealer, loggedInUserId);
 
         assertNotNull(updatedDealer);
         assertEquals("Uncle", updatedDealer.getFirstName());
@@ -130,21 +131,23 @@ public class ScrapDealerServiceImplTest {
 
     @Test
     public void updateScrapDealerInvalidUserTest() {
-        UUID loggedInUserId = UUID.randomUUID(); // logged-in user is different
+        UUID loggedInUserId = UUID.randomUUID();
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(sampleDealer));
 
-        UnauthorizedAccessException exception = assertThrows(UnauthorizedAccessException.class, () -> {
-            scrapDealerService.updateScrapDealer(scrapDealerId, sampleDealer, loggedInUserId);
-        });
+        UnauthorizedAccessException exception = 
+            assertThrows(UnauthorizedAccessException.class, () -> {
+                scrapDealerService.updateScrapDealer(scrapDealerId, sampleDealer, loggedInUserId);
+            });
 
-        assertEquals("You are not allowed to modify this scrap dealer's details", exception.getMessage());
+        assertEquals("You are not allowed to modify this scrap dealer's details", 
+            exception.getMessage());
         verify(scrapDealerRepository, times(1)).findById(any(UUID.class));
         verify(scrapDealerRepository, never()).save(any(ScrapDealer.class));
     }
 
     @Test
     public void deleteDealerByIdTest() {
-        UUID loggedInUserId = scrapDealerId; // logged-in user is the same dealer
+        UUID loggedInUserId = scrapDealerId;
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(sampleDealer));
 
         scrapDealerService.deleteDealerById(scrapDealerId, loggedInUserId);
@@ -155,12 +158,13 @@ public class ScrapDealerServiceImplTest {
 
     @Test
     public void deleteDealerByIdInvalidUserTest() {
-        UUID loggedInUserId = UUID.randomUUID(); // logged-in user is different
+        UUID loggedInUserId = UUID.randomUUID();
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(sampleDealer));
 
-        UnauthorizedAccessException exception = assertThrows(UnauthorizedAccessException.class, () -> {
-            scrapDealerService.deleteDealerById(scrapDealerId, loggedInUserId);
-        });
+        UnauthorizedAccessException exception = assertThrows(
+            UnauthorizedAccessException.class, () -> {
+                scrapDealerService.deleteDealerById(scrapDealerId, loggedInUserId);
+            });
 
         assertEquals("You are not allowed to delete this scrap dealer", exception.getMessage());
         verify(scrapDealerRepository, times(1)).findById(any(UUID.class));
