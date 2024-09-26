@@ -13,14 +13,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "scrap_dealer_Availability")
@@ -43,13 +41,21 @@ public class Availability {
     @JsonBackReference
     private ScrapDealer scrapDealer;
 
+    public Availability(
+        Long id, String location, LocalDate availableDate, ScrapDealer scrapDealer) {
+        this.id = id;
+        this.location = location;
+        this.availableDate = availableDate;
+        this.scrapDealer = new ScrapDealer(scrapDealer);  // Defensive copy
+    }
+
     // Getter with defensive copy
     public ScrapDealer getScrapDealer() {
-        return (this.scrapDealer != null) ? new ScrapDealer(this.scrapDealer) : null;
+        return new ScrapDealer(scrapDealer);
     }
 
     // Setter with defensive copy
     public void setScrapDealer(ScrapDealer scrapDealer) {
-        this.scrapDealer = (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
+        this.scrapDealer = new ScrapDealer(scrapDealer);
     }
 }

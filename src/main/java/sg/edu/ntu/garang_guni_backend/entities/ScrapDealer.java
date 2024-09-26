@@ -17,8 +17,6 @@ import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +24,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "scrap_dealer")
 public class ScrapDealer {
@@ -51,7 +48,8 @@ public class ScrapDealer {
     @Column(name = "email", unique = true)
     private String email;
 
-    @Pattern(regexp = "^\\+65[689]\\d{7}$", message = "Phone number must be in the format +65 followed by 8 digits starting with 6, 8, or 9")
+    @Pattern(regexp = "^\\+65[689]\\d{7}$", message = "Phone number must be in the format +65 "
+        + "followed by 8 digits starting with 6, 8, or 9")
     @NotBlank(message = "Phone number is required")
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -60,24 +58,20 @@ public class ScrapDealer {
     @JsonManagedReference
     private List<Availability> availabilityList = new ArrayList<>();
 
-    // Getter with defensive copy
-    public List<Availability> getAvailabilityList() {
-        return (this.availabilityList != null) ? new ArrayList<>(this.availabilityList) : new ArrayList<>();
-    }
-
-    // Setter with defensive copy
-    public void setAvailabilityList(List<Availability> availabilityList) {
-        this.availabilityList = (availabilityList != null) ? new ArrayList<>(availabilityList) : new ArrayList<>();
-    }
-
-    // Copy constructor for defensive copying
     public ScrapDealer(ScrapDealer scrapDealer) {
         this.scrapDealerId = scrapDealer.getScrapDealerId();
         this.firstName = scrapDealer.getFirstName();
         this.lastName = scrapDealer.getLastName();
         this.email = scrapDealer.getEmail();
         this.phoneNumber = scrapDealer.getPhoneNumber();
-        this.availabilityList = (scrapDealer.getAvailabilityList() != null) 
-                ? new ArrayList<>(scrapDealer.getAvailabilityList()) : new ArrayList<>();
+        this.availabilityList = new ArrayList<>(scrapDealer.getAvailabilityList());
+    }
+
+    public List<Availability> getAvailabilityList() {
+        return new ArrayList<>(availabilityList);
+    }
+
+    public void setAvailabilityList(List<Availability> availabilityList) {
+        this.availabilityList = new ArrayList<>(availabilityList);
     }
 }
