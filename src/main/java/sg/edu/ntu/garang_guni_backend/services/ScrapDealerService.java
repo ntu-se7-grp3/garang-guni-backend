@@ -1,9 +1,8 @@
 package sg.edu.ntu.garang_guni_backend.services;
 
-import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
-
 import java.util.List;
 import java.util.UUID;
+import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
 
 public interface ScrapDealerService {
 

@@ -1,5 +1,7 @@
 package sg.edu.ntu.garang_guni_backend.services.impls;
 
+import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
@@ -7,9 +9,6 @@ import sg.edu.ntu.garang_guni_backend.exceptions.ScrapDealerNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.UnauthorizedAccessException;
 import sg.edu.ntu.garang_guni_backend.repositories.ScrapDealerRepository;
 import sg.edu.ntu.garang_guni_backend.services.ScrapDealerService;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class ScrapDealerServiceImpl implements ScrapDealerService {
@@ -22,20 +21,22 @@ public class ScrapDealerServiceImpl implements ScrapDealerService {
         if (scrapDealer.getFirstName() == null || scrapDealer.getFirstName().isBlank()) {
             throw new IllegalArgumentException("First name is required.");
         }
+    
         if (scrapDealer.getLastName() == null || scrapDealer.getLastName().isBlank()) {
             throw new IllegalArgumentException("Last name is required.");
         }
+    
         if (scrapDealer.getEmail() == null || scrapDealer.getEmail().isBlank()) {
             throw new IllegalArgumentException("Email is required.");
-        }
-        if (!scrapDealer.getEmail().matches("^\\S+@\\S+\\.\\S+$")) {
+        } else if (!scrapDealer.getEmail().matches("^\\S+@\\S+\\.\\S+$")) {
             throw new IllegalArgumentException("Email format is invalid.");
         }
+    
         if (scrapDealer.getPhoneNumber() == null || scrapDealer.getPhoneNumber().isBlank()) {
             throw new IllegalArgumentException("Phone number is required.");
-        }
-        if (!scrapDealer.getPhoneNumber().matches("^\\+65[689]\\d{7}$")) {
-            throw new IllegalArgumentException("Phone number must start with +65 followed by 8 digits starting with 6, 8, or 9.");
+        } else if (!scrapDealer.getPhoneNumber().matches("^\\+65[689]\\d{7}$")) {
+            throw new IllegalArgumentException(
+                "Phone number must start with +65 followed by 8 digits starting with 6, 8, or 9.");
         }
     
         return scrapDealerRepository.save(scrapDealer);
@@ -58,7 +59,8 @@ public class ScrapDealerServiceImpl implements ScrapDealerService {
         ScrapDealer existingDealer = getScrapDealerById(id);
 
         if (!existingDealer.getScrapDealerId().equals(loggedInUserId)) {
-            throw new UnauthorizedAccessException("You are not allowed to modify this scrap dealer's details");
+            throw new UnauthorizedAccessException(
+                "You are not allowed to modify this scrap dealer's details");
         }
 
         existingDealer.setFirstName(scrapDealer.getFirstName());
@@ -71,7 +73,8 @@ public class ScrapDealerServiceImpl implements ScrapDealerService {
         ScrapDealer dealer = getScrapDealerById(id);
 
         if (!dealer.getScrapDealerId().equals(loggedInUserId)) {
-            throw new UnauthorizedAccessException("You are not allowed to delete this scrap dealer");
+            throw new UnauthorizedAccessException(
+                "You are not allowed to delete this scrap dealer");
         }
 
         scrapDealerRepository.delete(dealer);
