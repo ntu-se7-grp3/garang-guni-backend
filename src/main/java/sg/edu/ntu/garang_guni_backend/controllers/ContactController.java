@@ -24,23 +24,14 @@ public class ContactController {
     @Autowired
     private ContactService contactService;
 
-    public ContactController(final ContactService contactService) {
+    public ContactController(ContactService contactService) {
         this.contactService = contactService;
     }
 
     @PostMapping({ "", "/" })
     public ResponseEntity<?> createContact(@Valid @RequestBody Contact contact) {
-        try {
-            Contact createdContact = contactService.createContact(contact);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdContact);
-        } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } catch (ContactNotProcessingException e) {
-            ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        } catch (Exception e) {
-            throw new RuntimeException("Unexpected error occurred while creating contact", e);
-        }
+        Contact createdContact = contactService.createContact(contact);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdContact);
     }
     
     @GetMapping({ "", "/" })

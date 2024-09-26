@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ContactNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleContactNotFoundException(
-        ContactNotFoundException ex) {
+            ContactNotFoundException ex) {
         logger.error("Error: ", ex);
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND); // 404
