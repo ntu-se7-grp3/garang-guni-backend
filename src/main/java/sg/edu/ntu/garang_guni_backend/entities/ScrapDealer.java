@@ -1,11 +1,10 @@
 package sg.edu.ntu.garang_guni_backend.entities;
 
-import java.util.List;
-import java.util.UUID;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,6 +14,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,6 +56,7 @@ public class ScrapDealer {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "scrapDealer", cascade = CascadeType.ALL)
-    private List<Availability> availabilityList;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "scrapDealer", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Availability> availabilityList = new ArrayList<>();
 }
