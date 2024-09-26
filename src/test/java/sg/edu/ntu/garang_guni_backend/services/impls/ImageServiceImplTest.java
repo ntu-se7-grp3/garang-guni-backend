@@ -245,6 +245,48 @@ class ImageServiceImplTest {
                 () -> imgService.assignItemToNewImage(item, file));
     }
 
+
+    @Test
+    @DisplayName("Assign Item To Existing Image - Successful")
+    void assignItemToExistingImageTest() throws Exception {
+        UUID id = UUID.randomUUID();
+        Image image = new Image();
+        image.setImageId(id);
+        image.setImageName("test_image.png");
+        image.setImageData(ImageUtils.compressImage("compressed_image_data".getBytes()));
+
+        Item item = Item.builder()
+                        .itemName("Test item")
+                        .itemDescription("It's just an Item.")
+                        .build();
+
+        when(imgRepository.findById(id)).thenReturn(Optional.of(image));
+        when(imgRepository.save(any(Image.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        UUID imageId = imgService.assignItemToExistingImage(item, id);
+        
+        assertEquals(id, imageId);
+        verify(imgRepository, times(1)).save(any(Image.class));
+        verify(imgRepository, times(1)).findById(any(UUID.class));
+    }
+
+    @Test
+    @DisplayName("Assign Item To Existing Image - Invalid image Id")
+    void assignItemToNonExistingImageTest() {
+        UUID id = UUID.randomUUID();
+    
+        Item item = Item.builder()
+                        .itemName("Test item")
+                        .itemDescription("It's just an Item.")
+                        .build();
+
+        when(imgRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ImageNotFoundException.class,
+            () -> imgService.assignItemToExistingImage(item, id));
+    }
+
     @Test
     @DisplayName("Is Linked - Successful")
     void isLinkedTest() {

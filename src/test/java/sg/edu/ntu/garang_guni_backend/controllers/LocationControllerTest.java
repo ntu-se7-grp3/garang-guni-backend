@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,7 +26,12 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import sg.edu.ntu.garang_guni_backend.entities.Booking;
+import sg.edu.ntu.garang_guni_backend.entities.BookingRequest;
+import sg.edu.ntu.garang_guni_backend.entities.CollectionType;
 import sg.edu.ntu.garang_guni_backend.entities.Location;
+import sg.edu.ntu.garang_guni_backend.entities.PaymentMethod;
+import sg.edu.ntu.garang_guni_backend.exceptions.booking.BookingNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.location.LocationNotFoundException;
 
 @SpringBootTest
@@ -46,6 +52,9 @@ class LocationControllerTest {
     private static Location sampleLocationWithInvalidLat;
     private static Location sampleLocationWithInvalidLng;
     private static Location updatedLocation;
+    private static Booking sampleBooking;
+    private static Booking invalidBooking;
+    private static BookingRequest sampleBookingRequest;
     private static final String SAMPLE_LOCATION_NAME = "Fitzroy";
     private static final String SAMPLE_LOCATION_ADDRESS = "104 Cecil Street";
     private static final String UPDATED_LOCATION_NAME = "My Home";
@@ -58,6 +67,16 @@ class LocationControllerTest {
             BigDecimal.valueOf(1.2811726568429875);
     private static final BigDecimal INVALID_LOCATION_LNG =
             BigDecimal.valueOf(103.84897437092968);
+    private static final String SAMPLE_USER_ID = "1111-1111-1111-1111";
+    private static final LocalDateTime SAMPLE_BOOKING_DATE_TIME = 
+            LocalDateTime.parse("2024-09-25T14:30:00");
+    private static final LocalDateTime SAMPLE_APPOINTMENT_DATE_TIME = 
+            LocalDateTime.parse("2024-09-27T14:30:00");  
+    private static final String SAMPLE_BOOKING_DATE_TIME_PLAIN = 
+            "2024-09-25T14:30:00";
+    private static final String SAMPLE_APPOINTMENT_DATE_TIME_PLAIN = 
+            "2024-09-27T14:30:00";  
+    private static final String SAMPLE_REMARKS = "What is this Test?";
 
 
     @BeforeAll
@@ -108,6 +127,35 @@ class LocationControllerTest {
                                 .latitude(SAMPLE_LOCATION_LAT)
                                 .longitude(SAMPLE_LOCATION_LNG)
                                 .build();
+        
+        sampleBooking = Booking.builder()
+                .userId(SAMPLE_USER_ID)
+                .bookingDateTime(SAMPLE_BOOKING_DATE_TIME)
+                .appointmentDateTime(SAMPLE_APPOINTMENT_DATE_TIME)
+                .isLocationSameAsRegistered(true)
+                .collectionType(CollectionType.HOME)
+                .paymentMethod(PaymentMethod.VISA)
+                .remarks(SAMPLE_REMARKS)
+                .build();
+        
+        invalidBooking = Booking.builder()
+                .bookingDateTime(SAMPLE_BOOKING_DATE_TIME)
+                .appointmentDateTime(SAMPLE_APPOINTMENT_DATE_TIME)
+                .isLocationSameAsRegistered(true)
+                .collectionType(CollectionType.HOME)
+                .paymentMethod(PaymentMethod.VISA)
+                .remarks(SAMPLE_REMARKS)
+                .build();
+
+        sampleBookingRequest = BookingRequest.builder()
+                .userId(SAMPLE_USER_ID)
+                .bookingDateTime(SAMPLE_BOOKING_DATE_TIME)
+                .appointmentDateTime(SAMPLE_APPOINTMENT_DATE_TIME)
+                .isLocationSameAsRegistered(true)
+                .collectionType(CollectionType.HOME)
+                .paymentMethod(PaymentMethod.VISA)
+                .remarks(SAMPLE_REMARKS)
+                .build();
     }
 
     @DisplayName("Create Location - Successful")
@@ -329,6 +377,312 @@ class LocationControllerTest {
                .delete("/locations/" + createdlocationId);
 
         mockMvc.perform(deleteRequest)
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof LocationNotFoundException));
+    }
+
+    @DisplayName("Add New Booking To Location - Successful")
+    @Test
+    void addNewBookingToLocationTest() throws Exception {
+        String createdLocationAsJson =
+                postVerifyAndRetrieveLocationResponse(sampleLocation);
+        String createdlocationId =
+                JsonPath.read(createdLocationAsJson, "$.locationId");
+
+        String sampleBookingAsJson = objectMapper.writeValueAsString(sampleBooking);
+
+        RequestBuilder postRequest = MockMvcRequestBuilders
+               .post("/locations/" + createdlocationId + "/bookings")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(sampleBookingAsJson);
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.bookingId").exists())
+                .andExpect(jsonPath("$.location.locationId")
+                            .value(createdlocationId))
+                .andExpect(jsonPath("$.userId")
+                            .value(SAMPLE_USER_ID))
+                .andExpect(jsonPath("$.bookingDateTime")
+                            .value(SAMPLE_BOOKING_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.appointmentDateTime")
+                            .value(SAMPLE_APPOINTMENT_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.locationSameAsRegistered")
+                            .value(true))
+                .andExpect(jsonPath("$.collectionType")
+                            .value("HOME"))
+                .andExpect(jsonPath("$.paymentMethod")
+                            .value("VISA"))
+                .andExpect(jsonPath("$.remarks")
+                            .value(SAMPLE_REMARKS));
+    }
+
+    @DisplayName("Add New Booking To Location - Invalid Location Id")
+    @Test
+    void addNewBookingToNonExistantLocationTest() throws Exception {
+        String createdlocationId = UUID.randomUUID().toString();
+
+        String sampleBookingAsJson = objectMapper.writeValueAsString(sampleBooking);
+
+        RequestBuilder postRequest = MockMvcRequestBuilders
+               .post("/locations/" + createdlocationId + "/bookings")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(sampleBookingAsJson);
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof LocationNotFoundException));
+    }
+    
+    @DisplayName("Add New Booking To Location - Missing Parameters")
+    @Test
+    void addInvalidBookingToLocationTest() throws Exception {
+        String createdLocationAsJson =
+                postVerifyAndRetrieveLocationResponse(sampleLocation);
+        String createdlocationId =
+                JsonPath.read(createdLocationAsJson, "$.locationId");
+
+        String invalidBookingAsJson = 
+                objectMapper.writeValueAsString(invalidBooking);
+
+        RequestBuilder postRequest = MockMvcRequestBuilders
+               .post("/locations/" + createdlocationId + "/bookings")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(invalidBookingAsJson);
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof MethodArgumentNotValidException));
+    }
+
+    @DisplayName("Add Exisiting Booking To Location - Successful")
+    @Test
+    void addExistingBookingToLocationTest() throws Exception {
+        String createdLocationAsJson =
+                postVerifyAndRetrieveLocationResponse(sampleLocation);
+        String createdlocationId =
+                JsonPath.read(createdLocationAsJson, "$.locationId");
+
+        String sampleBookingAsJson = 
+                objectMapper.writeValueAsString(sampleBookingRequest);
+
+        RequestBuilder postRequest = MockMvcRequestBuilders
+               .post("/bookings")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(sampleBookingAsJson);
+
+        String createdBookingAsJson = 
+            mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.bookingId").exists())
+                .andExpect(jsonPath("$.userId")
+                            .value(SAMPLE_USER_ID))
+                .andExpect(jsonPath("$.bookingDateTime")
+                            .value(SAMPLE_BOOKING_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.appointmentDateTime")
+                            .value(SAMPLE_APPOINTMENT_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.locationSameAsRegistered")
+                            .value(true))
+                .andExpect(jsonPath("$.collectionType")
+                            .value("HOME"))
+                .andExpect(jsonPath("$.paymentMethod")
+                            .value("VISA"))
+                .andExpect(jsonPath("$.remarks")
+                            .value(SAMPLE_REMARKS))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String createdBookingId =
+                JsonPath.read(createdBookingAsJson, "$.bookingId");    
+        
+        RequestBuilder putRequest = MockMvcRequestBuilders
+                .put("/locations/" + createdlocationId + "/bookings/" + createdBookingId);
+        
+        mockMvc.perform(putRequest)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.location.locationId")
+                            .value(createdlocationId));
+    }
+
+    @DisplayName("Add Exisiting Booking To Location - Invalid Location Id")
+    @Test
+    void addExistingBookingToNonExistantLocationTest() throws Exception {
+        String createdlocationId = UUID.randomUUID().toString();
+
+        String sampleBookingAsJson = 
+                objectMapper.writeValueAsString(sampleBookingRequest);
+
+        RequestBuilder postRequest = MockMvcRequestBuilders
+               .post("/bookings")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(sampleBookingAsJson);
+
+        String createdBookingAsJson = 
+            mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.bookingId").exists())
+                .andExpect(jsonPath("$.userId")
+                            .value(SAMPLE_USER_ID))
+                .andExpect(jsonPath("$.bookingDateTime")
+                            .value(SAMPLE_BOOKING_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.appointmentDateTime")
+                            .value(SAMPLE_APPOINTMENT_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.locationSameAsRegistered")
+                            .value(true))
+                .andExpect(jsonPath("$.collectionType")
+                            .value("HOME"))
+                .andExpect(jsonPath("$.paymentMethod")
+                            .value("VISA"))
+                .andExpect(jsonPath("$.remarks")
+                            .value(SAMPLE_REMARKS))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String createdBookingId =
+                JsonPath.read(createdBookingAsJson, "$.bookingId");    
+        
+        RequestBuilder putRequest = MockMvcRequestBuilders
+                .put("/locations/" + createdlocationId + "/bookings/" + createdBookingId);
+        
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof LocationNotFoundException));
+    }
+
+    @DisplayName("Add Exisiting Booking To Location - Invalid Booking Id")
+    @Test
+    void addNonExistantBookingToLocationTest() throws Exception {
+        String createdLocationAsJson =
+                postVerifyAndRetrieveLocationResponse(sampleLocation);
+        String createdlocationId =
+                JsonPath.read(createdLocationAsJson, "$.locationId");
+
+        String createdBookingId = UUID.randomUUID().toString();    
+        
+        RequestBuilder putRequest = MockMvcRequestBuilders
+                .put("/locations/" + createdlocationId + "/bookings/" + createdBookingId);
+        
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof BookingNotFoundException));
+    }
+
+    @DisplayName("Get All Booking - Successful")
+    @Test
+    void getAllBookingsTest() throws Exception {
+        String createdLocationAsJson =
+                postVerifyAndRetrieveLocationResponse(sampleLocation);
+        String createdlocationId =
+                JsonPath.read(createdLocationAsJson, "$.locationId");
+
+        String sampleBookingAsJson = objectMapper.writeValueAsString(sampleBooking);
+
+        RequestBuilder postRequest = MockMvcRequestBuilders
+               .post("/locations/" + createdlocationId + "/bookings")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(sampleBookingAsJson);
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.bookingId").exists())
+                .andExpect(jsonPath("$.location.locationId")
+                            .value(createdlocationId))
+                .andExpect(jsonPath("$.userId")
+                            .value(SAMPLE_USER_ID))
+                .andExpect(jsonPath("$.bookingDateTime")
+                            .value(SAMPLE_BOOKING_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.appointmentDateTime")
+                            .value(SAMPLE_APPOINTMENT_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.locationSameAsRegistered")
+                            .value(true))
+                .andExpect(jsonPath("$.collectionType")
+                            .value("HOME"))
+                .andExpect(jsonPath("$.paymentMethod")
+                            .value("VISA"))
+                .andExpect(jsonPath("$.remarks")
+                            .value(SAMPLE_REMARKS));
+        
+        RequestBuilder getRequest = MockMvcRequestBuilders
+                .get("/locations/" + createdlocationId + "/bookings");
+
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.[0].location.locationId")
+                            .value(createdlocationId))
+                .andExpect(jsonPath("$.[0].userId")
+                            .value(SAMPLE_USER_ID))
+                .andExpect(jsonPath("$.[0].bookingDateTime")
+                            .value(SAMPLE_BOOKING_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.[0].appointmentDateTime")
+                            .value(SAMPLE_APPOINTMENT_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.[0].locationSameAsRegistered")
+                            .value(true))
+                .andExpect(jsonPath("$.[0].collectionType")
+                            .value("HOME"))
+                .andExpect(jsonPath("$.[0].paymentMethod")
+                            .value("VISA"))
+                .andExpect(jsonPath("$.[0].remarks")
+                            .value(SAMPLE_REMARKS));
+    }
+
+    @DisplayName("Get All Booking - Invalid Location Id")
+    @Test
+    void getAllBookingsWithInvalidLocationIdTest() throws Exception {
+        String createdlocationId = UUID.randomUUID().toString();
+
+        String sampleBookingAsJson = objectMapper.writeValueAsString(sampleBookingRequest);
+
+        RequestBuilder postRequest = MockMvcRequestBuilders
+               .post("/bookings")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(sampleBookingAsJson);
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.bookingId").exists())
+                .andExpect(jsonPath("$.userId")
+                            .value(SAMPLE_USER_ID))
+                .andExpect(jsonPath("$.bookingDateTime")
+                            .value(SAMPLE_BOOKING_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.appointmentDateTime")
+                            .value(SAMPLE_APPOINTMENT_DATE_TIME_PLAIN))
+                .andExpect(jsonPath("$.locationSameAsRegistered")
+                            .value(true))
+                .andExpect(jsonPath("$.collectionType")
+                            .value("HOME"))
+                .andExpect(jsonPath("$.paymentMethod")
+                            .value("VISA"))
+                .andExpect(jsonPath("$.remarks")
+                            .value(SAMPLE_REMARKS));
+        
+        RequestBuilder getRequest = MockMvcRequestBuilders
+                .get("/locations/" + createdlocationId + "/bookings");
+
+        mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(result -> 

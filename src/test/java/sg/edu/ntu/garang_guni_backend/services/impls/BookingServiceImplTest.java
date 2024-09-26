@@ -266,6 +266,7 @@ class BookingServiceImplTest {
         assertNotEquals(sampleItem, addedItem);
         assertEquals(SAMPLE_ITEM_NAME, addedItem.getItemName());
         assertEquals(SAMPLE_ITEM_DESCRIPTION, addedItem.getItemDescription());
+        verify(bookingRepository, times(1)).findById(any(UUID.class));
     }
 
     @DisplayName("Add New Item To Booking - Invalid Booking Id")
@@ -293,6 +294,7 @@ class BookingServiceImplTest {
         assertNotEquals(sampleItem, addedItem);
         assertEquals(SAMPLE_ITEM_NAME, addedItem.getItemName());
         assertEquals(SAMPLE_ITEM_DESCRIPTION, addedItem.getItemDescription());
+        verify(bookingRepository, times(1)).findById(any(UUID.class));
     }
 
     @DisplayName("Add New Item To Booking - Invalid Booking Id")
@@ -320,6 +322,7 @@ class BookingServiceImplTest {
         assertNotEquals(sampleItem, retrievedItem);
         assertEquals(SAMPLE_ITEM_NAME, retrievedItem.getItemName());
         assertEquals(SAMPLE_ITEM_DESCRIPTION, retrievedItem.getItemDescription());
+        verify(bookingRepository, times(1)).findById(any(UUID.class));
     }
 
     @DisplayName("Add All Items - Invalid Booking Id")

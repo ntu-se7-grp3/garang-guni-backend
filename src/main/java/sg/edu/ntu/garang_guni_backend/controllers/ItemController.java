@@ -69,7 +69,7 @@ public class ItemController {
             @PathVariable UUID itemId,
             @PathVariable UUID imageId) {
         UUID newImageId = itemService.addExistingImageToItem(itemId, imageId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newImageId);
+        return ResponseEntity.status(HttpStatus.OK).body(newImageId);
     }
 
     @GetMapping("/{id}/images")

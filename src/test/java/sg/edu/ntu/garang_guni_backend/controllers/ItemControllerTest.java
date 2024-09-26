@@ -1,5 +1,6 @@
 package sg.edu.ntu.garang_guni_backend.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -24,10 +25,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import sg.edu.ntu.garang_guni_backend.entities.Image;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
+import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageUnsupportedTypeException;
 import sg.edu.ntu.garang_guni_backend.exceptions.item.ItemNotFoundException;
 import sg.edu.ntu.garang_guni_backend.services.impls.ImageServiceImpl;
+import sg.edu.ntu.garang_guni_backend.utils.ImageUtils;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -236,9 +240,9 @@ class ItemControllerTest {
                         instanceof ItemNotFoundException));
     }
 
-    @DisplayName("Add Image To Item - Successful")
+    @DisplayName("Add New Image To Item - Successful")
     @Test
-    void addImageToItemtest() throws Exception {
+    void addNewImageToItemtest() throws Exception {
         String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");  
         
@@ -259,9 +263,9 @@ class ItemControllerTest {
         assertTrue(imgService.isLinked(imgId, createdItemId));
     }
 
-    @DisplayName("Add Image To Item - Invalid Id")
+    @DisplayName("Add New Image To Item - Invalid Id")
     @Test
-    void addImageToNonExistantItemtest() throws Exception {
+    void addNewImageToNonExistantItemtest() throws Exception {
         UUID invalidId = UUID.randomUUID();
 
         RequestBuilder postRequest = MockMvcRequestBuilders
@@ -276,9 +280,9 @@ class ItemControllerTest {
                         instanceof ItemNotFoundException));
     }
 
-    @DisplayName("Add Image To Item - Invalid File type")
+    @DisplayName("Add New Image To Item - Invalid File type")
     @Test
-    void addTextFileToItemtest() throws Exception {
+    void addNewTextFileToItemtest() throws Exception {
         String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");  
 
@@ -297,6 +301,85 @@ class ItemControllerTest {
                 .andExpect(result -> 
                     assertTrue(result.getResolvedException() 
                         instanceof ImageUnsupportedTypeException));
+    }
+
+    @DisplayName("Add Exisiting Image To Item - Successful")
+    @Test
+    void addExisitingImageToItemtest() throws Exception {
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
+        String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");  
+        
+        RequestBuilder postRequest = MockMvcRequestBuilders
+                .multipart("/images")
+                .file(imageToAdd);
+                
+        String unFormattedImgId = mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Get Content As String -> gives extra ""
+        String imgId = unFormattedImgId.replaceAll("^\"|\"$", "");
+
+        RequestBuilder putRequest = MockMvcRequestBuilders
+                .put("/items/" + createdItemId + "/images/" + imgId);
+
+        mockMvc.perform(putRequest)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+        assertTrue(imgService.isLinked(imgId, createdItemId));
+    }
+
+    @DisplayName("Add Exisiting Image To Item - Invalid Item Id")
+    @Test
+    void addExisitingImageToNonExistantItemtest() throws Exception {
+        String createdItemId = UUID.randomUUID().toString();  
+        
+        RequestBuilder postRequest = MockMvcRequestBuilders
+                .multipart("/images")
+                .file(imageToAdd);
+                
+        String unFormattedImgId = mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Get Content As String -> gives extra ""
+        String imgId = unFormattedImgId.replaceAll("^\"|\"$", "");
+
+        RequestBuilder putRequest = MockMvcRequestBuilders
+                .put("/items/" + createdItemId + "/images/" + imgId);
+
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof ItemNotFoundException));
+    }
+
+    @DisplayName("Add Exisiting Image To Item - Invalid Image Id")
+    @Test
+    void addNonExisitingImageToItemtest() throws Exception {
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
+        String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");  
+        
+        String imgId = UUID.randomUUID().toString();
+
+        RequestBuilder putRequest = MockMvcRequestBuilders
+                .put("/items/" + createdItemId + "/images/" + imgId);
+
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof ImageNotFoundException));
     }
 
     @DisplayName("View All Images - Successful")
@@ -365,6 +448,88 @@ class ItemControllerTest {
                 .get("/items/" + randomUuid + "/images");
         
         mockMvc.perform(getRequest)
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> 
+                    assertTrue(result.getResolvedException() 
+                        instanceof ItemNotFoundException));
+    }
+
+    @DisplayName("View All Images Details - Successful")
+    @Test
+    void viewAllImagesDetailsTest() throws Exception {
+        String createdItemAsJson = postVerifyAndRetrieveSampleItemResponse();
+        String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");  
+
+        RequestBuilder postRequest = MockMvcRequestBuilders
+                .multipart("/items/" + createdItemId + "/images")
+                .file(imageToAdd);
+                
+        String unFormattedImgId = mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        
+        // Get Content As String -> gives extra ""
+        String imgId = unFormattedImgId.replaceAll("^\"|\"$", "");
+        
+        assertTrue(imgService.isLinked(imgId, createdItemId));
+        
+        RequestBuilder postRequest2 = MockMvcRequestBuilders
+                .multipart("/items/" + createdItemId + "/images")
+                .file(imageToAdd2);
+                
+        String unFormattedImgId2 = mockMvc.perform(postRequest2)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Get Content As String -> gives extra ""
+        String imgId2 = unFormattedImgId2.replaceAll("^\"|\"$", "");
+
+        assertTrue(imgService.isLinked(imgId2, createdItemId));
+
+        RequestBuilder getAllImgDetailsRequest = MockMvcRequestBuilders
+                .get("/items/" + createdItemId + "/images/details");
+        
+        String retrievedImgListJson = mockMvc.perform(getAllImgDetailsRequest)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        
+        List<Image> images = objectMapper.readValue(retrievedImgListJson, 
+                new TypeReference<List<Image>>() {}); 
+
+        Image img1 = images.get(0);
+        assertEquals(2, images.size());
+        byte[] compressImg1Data = ImageUtils.compressImage(imageToAdd.getBytes());
+        assertEquals("image_to_add.png", img1.getImageName());
+        assertEquals("image/png", img1.getImageType());
+        assertArrayEquals(compressImg1Data, img1.getImageData());
+
+        Image img2 = images.get(1);
+        byte[] compressImg2Data = ImageUtils.compressImage(imageToAdd2.getBytes());
+        assertEquals("image_to_add2.png", img2.getImageName());
+        assertEquals("image/png", img2.getImageType());
+        assertArrayEquals(compressImg2Data, img2.getImageData());
+    }
+
+    @DisplayName("View All Images Details - Invalid Item Id ")
+    @Test
+    void viewAllImagesDetailsWithInvalidItemIdTest() throws Exception {
+        String createdItemId = UUID.randomUUID().toString();  
+
+        RequestBuilder postRequest = MockMvcRequestBuilders
+                .multipart("/items/" + createdItemId + "/images")
+                .file(imageToAdd);
+                
+        mockMvc.perform(postRequest)
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(result -> 
