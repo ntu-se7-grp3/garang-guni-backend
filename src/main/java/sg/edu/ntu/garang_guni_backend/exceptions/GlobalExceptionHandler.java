@@ -42,7 +42,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
-    // Handle validation errors
+    @ExceptionHandler(LocationNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLocationNotFound(LocationNotFoundException ex) {
+        logger.error("LocationNotFoundException: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
         MethodArgumentNotValidException ex) {
@@ -56,22 +62,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
     }
 
-    // @ExceptionHandler(MethodArgumentNotValidException.class)
-    // public ResponseEntity<Object> handleValidationExceptions(
-            //MethodArgumentNotValidException ex) {
-    //     List<String> errors = ex.getBindingResult()
-    //             .getFieldErrors()
-    //             .stream()
-    //             .map(error -> error.getField() + ": " + error.getDefaultMessage())
-    //             .collect(Collectors.toList());
-
-    //     // Log the errors
-    //     errors.forEach(System.out::println);
-
-    //     return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    // }
-
-    // Handle generic exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(
