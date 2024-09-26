@@ -24,8 +24,10 @@ public class SecurityConfiguration {
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     private final JwtTokenFilter jwtTokenFilter;
 
-    public SecurityConfiguration(CustomUserDetailsService customUserDetailsService, 
-        JwtTokenFilter jwtTokenFilter) {            
+    public SecurityConfiguration(
+        CustomUserDetailsService customUserDetailsService,
+        JwtTokenFilter jwtTokenFilter
+        ) {            
         this.customUserDetailsService = customUserDetailsService;
         this.jwtTokenFilter = jwtTokenFilter;
     }

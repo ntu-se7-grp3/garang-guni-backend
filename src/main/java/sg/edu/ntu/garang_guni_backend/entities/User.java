@@ -28,11 +28,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity // Tells Hibernate to make a table out of this class
-@Table(name = "my_user") // Tell Hibernate to name the table
+@Entity
+@Table(name = "my_user")
 public class User {
 
-    @Id // Primary key
+    @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private UUID id;

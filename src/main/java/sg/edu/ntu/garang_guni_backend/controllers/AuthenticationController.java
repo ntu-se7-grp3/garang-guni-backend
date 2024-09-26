@@ -44,7 +44,7 @@ public class AuthenticationController {
     /**
      * Creates a response containing the JWT token.
      *
-     * @param user   the authenticated or newly registered user
+     * @param user the authenticated or newly registered user
      * @param status the HTTP status to return
      * @return ResponseEntity with the token and status
      */
