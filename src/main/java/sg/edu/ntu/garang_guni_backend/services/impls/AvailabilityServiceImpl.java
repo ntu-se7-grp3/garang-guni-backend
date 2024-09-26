@@ -1,5 +1,8 @@
 package sg.edu.ntu.garang_guni_backend.services.impls;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sg.edu.ntu.garang_guni_backend.entities.Availability;
@@ -11,10 +14,6 @@ import sg.edu.ntu.garang_guni_backend.exceptions.UnauthorizedAccessException;
 import sg.edu.ntu.garang_guni_backend.repositories.AvailabilityRepository;
 import sg.edu.ntu.garang_guni_backend.repositories.ScrapDealerRepository;
 import sg.edu.ntu.garang_guni_backend.services.AvailabilityService;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class AvailabilityServiceImpl implements AvailabilityService {
@@ -46,14 +45,31 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         return availabilityRepository.findByAvailableDateAndLocation(date, location);
     }
 
+    // @Override
+    // public Availability updateAvailability(
+            //Long id, Availability availability, UUID loggedInUserId) {
+    //     Availability existingAvailability = availabilityRepository.findById(id)
+    //             .orElseThrow(() -> new AvailabilityNotFoundException("Availability not found"));
+
+    //     if (!existingAvailability.getScrapDealer().getScrapDealerId().equals(loggedInUserId)) {
+    //         throw new UnauthorizedAccessException(
+                    //"You are not allowed to modify this availability");
+    //     }
+
+    //     if (availability.getAvailableDate().isBefore(LocalDate.now())) {
+    //         throw new InvalidDateException("Available date cannot be in the past");
+    //     }
+
+    //     existingAvailability.setAvailableDate(availability.getAvailableDate());
+    //     existingAvailability.setLocation(availability.getLocation());
+
+    //     return availabilityRepository.save(existingAvailability);
+    // }
+
     @Override
-    public Availability updateAvailability(Long id, Availability availability, UUID loggedInUserId) {
+    public Availability updateAvailability(Long id, Availability availability) {
         Availability existingAvailability = availabilityRepository.findById(id)
                 .orElseThrow(() -> new AvailabilityNotFoundException("Availability not found"));
-
-        if (!existingAvailability.getScrapDealer().getScrapDealerId().equals(loggedInUserId)) {
-            throw new UnauthorizedAccessException("You are not allowed to modify this availability");
-        }
 
         if (availability.getAvailableDate().isBefore(LocalDate.now())) {
             throw new InvalidDateException("Available date cannot be in the past");
@@ -71,7 +87,8 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 .orElseThrow(() -> new AvailabilityNotFoundException("Availability not found"));
 
         if (!availability.getScrapDealer().getScrapDealerId().equals(loggedInUserId)) {
-            throw new UnauthorizedAccessException("You are not allowed to delete this availability");
+            throw new UnauthorizedAccessException(
+                "You are not allowed to delete this availability");
         }
 
         availabilityRepository.delete(availability);
