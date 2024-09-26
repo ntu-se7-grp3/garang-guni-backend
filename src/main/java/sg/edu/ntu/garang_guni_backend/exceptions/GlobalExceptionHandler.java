@@ -17,13 +17,15 @@ public class GlobalExceptionHandler {
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ScrapDealerNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleScrapDealerNotFound(ScrapDealerNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleScrapDealerNotFound(
+        ScrapDealerNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AvailabilityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleAvailabilityNotFound(AvailabilityNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleAvailabilityNotFound(
+        AvailabilityNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
@@ -53,6 +55,21 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(sb.toString(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
     }
+
+    // @ExceptionHandler(MethodArgumentNotValidException.class)
+    // public ResponseEntity<Object> handleValidationExceptions(
+            //MethodArgumentNotValidException ex) {
+    //     List<String> errors = ex.getBindingResult()
+    //             .getFieldErrors()
+    //             .stream()
+    //             .map(error -> error.getField() + ": " + error.getDefaultMessage())
+    //             .collect(Collectors.toList());
+
+    //     // Log the errors
+    //     errors.forEach(System.out::println);
+
+    //     return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    // }
 
     // Handle generic exceptions
     @ExceptionHandler(Exception.class)
