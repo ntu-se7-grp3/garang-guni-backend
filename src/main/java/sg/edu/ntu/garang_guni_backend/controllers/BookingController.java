@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sg.edu.ntu.garang_guni_backend.entities.Booking;
+import sg.edu.ntu.garang_guni_backend.entities.BookingRequest;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.services.BookingService;
 
@@ -34,10 +36,10 @@ public class BookingController {
 
     @PostMapping({ "", "/" })
     public ResponseEntity<Booking> createBooking(
-            @Valid @RequestBody Booking newBooking) {
+            @Valid @ModelAttribute BookingRequest newBookingRequest) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(bookingService.createBooking(newBooking));
+                .body(bookingService.createBooking(newBookingRequest));
     }
 
     @GetMapping("/{bookingId}")

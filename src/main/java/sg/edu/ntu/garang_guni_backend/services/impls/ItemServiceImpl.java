@@ -1,6 +1,7 @@
 package sg.edu.ntu.garang_guni_backend.services.impls;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -101,6 +102,15 @@ public class ItemServiceImpl implements ItemService {
                 .findById(itemId)
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
         return imgService.assignItemToExistingImage(selectedItem, imageId);
+    }
+
+    @Override
+    public List<UUID> addAllNewImageToItem(UUID itemId, List<MultipartFile> files) {
+        List<UUID> allImgIds = new ArrayList<>();
+        for (MultipartFile file : files) {
+            allImgIds.add(addNewImageToItem(itemId, file));
+        }
+        return allImgIds;
     }
 
     @Override
