@@ -45,7 +45,7 @@ class ItemControllerTest {
     private static final String SAMPLE_ITEM_NAME = "Aluminium Cans";
     private static final String SAMPLE_ITEM_DESCRIPTION = "It's a metal can.";
     private static final String UPDATED_ITEM_NAME = "Steel Cans";
-    private static final String UPDATED_ITEM_DESCRIPTON = "It's STILL a metal can.";
+    private static final String UPDATED_ITEM_DESCRIPTION = "It's STILL a metal can.";
     private static Item sampleItem;
     private static Item updatedItem;
     private static Item itemWithoutName;
@@ -65,7 +65,7 @@ class ItemControllerTest {
         
         updatedItem = Item.builder()
                 .itemName(UPDATED_ITEM_NAME)
-                .itemDescription(UPDATED_ITEM_DESCRIPTON)
+                .itemDescription(UPDATED_ITEM_DESCRIPTION)
                 .build();
 
         itemWithoutName = Item.builder()
@@ -163,7 +163,7 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.itemName")
                             .value(UPDATED_ITEM_NAME))
                 .andExpect(jsonPath("$.itemDescription")
-                            .value(UPDATED_ITEM_DESCRIPTON));
+                            .value(UPDATED_ITEM_DESCRIPTION));
     }
 
     @DisplayName("Update Item - Invalid Id")
