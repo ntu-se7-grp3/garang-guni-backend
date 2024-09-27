@@ -16,7 +16,7 @@ import sg.edu.ntu.garang_guni_backend.services.AuthenticationService;
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
@@ -59,10 +59,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         login.getPassword()));
 
         return userRepository.findByEmail(login.getEmail())
-                .orElseThrow(
-                        () -> new UsernameNotFoundException(
-                            "User not found with email: " + login.getEmail()
-                            )
-                        );
+            .orElseThrow(
+                () -> new UsernameNotFoundException(
+                    "User not found with email: " + login.getEmail()
+                    )
+                );
     }
 }

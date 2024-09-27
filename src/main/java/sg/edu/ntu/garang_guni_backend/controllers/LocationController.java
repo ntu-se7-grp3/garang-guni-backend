@@ -80,7 +80,6 @@ public class LocationController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(locationService
                     .addExisitingBookingToLocation(locationId, bookingId));
-        
     }
 
     @GetMapping({"/{locationId}/bookings", "/{locationId}/bookings/"})

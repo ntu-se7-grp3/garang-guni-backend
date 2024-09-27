@@ -58,6 +58,7 @@ public class User {
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
+
     private UserRole role;
 
     @Column(name = "contact_no")

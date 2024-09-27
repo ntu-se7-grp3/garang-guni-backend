@@ -12,11 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sg.edu.ntu.garang_guni_backend.entities.LoginRequest;
 import sg.edu.ntu.garang_guni_backend.entities.User;
+import sg.edu.ntu.garang_guni_backend.entities.UserRole;
 import sg.edu.ntu.garang_guni_backend.security.JwtTokenUtil;
 import sg.edu.ntu.garang_guni_backend.services.AuthenticationService;
 
 @RestController
-@RequestMapping("auth")
+@RequestMapping("/auth")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
@@ -27,6 +28,31 @@ public class AuthenticationController {
             JwtTokenUtil jwtTokenUtil) {
         this.authenticationService = authenticationService;
         this.jwtTokenUtil = jwtTokenUtil;
+    }
+
+    // Scrap Dealer Signup
+    @PostMapping("/signup/scrapdealer")
+    public ResponseEntity<Map<String, String>> registerScrapDealer(@Valid @RequestBody User user) {
+        user.setRole(UserRole.SCRAP_DEALER); // Assign Scrap Dealer role
+        return generateSignupResponse(user);
+    }
+
+    // Admin Signup (optional)
+    @PostMapping("/signup/admin")
+    public ResponseEntity<Map<String, String>> registerAdmin(@Valid @RequestBody User user) {
+        user.setRole(UserRole.ADMIN); // Assign Admin role
+        return generateSignupResponse(user);
+    }
+
+    // Shared method to generate response
+    private ResponseEntity<Map<String, String>> generateSignupResponse(User user) {
+        User newUser = authenticationService.signup(user);
+        String token = jwtTokenUtil.createToken(newUser);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/signup")

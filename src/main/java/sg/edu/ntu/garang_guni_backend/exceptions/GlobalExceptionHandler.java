@@ -40,12 +40,26 @@ public class GlobalExceptionHandler {
             ContactNotFoundException.class,
             ImageNotFoundException.class,
             ItemNotFoundException.class,
+            ScrapDealerNotFoundException.class,
+            AvailabilityNotFoundException.class,
             LocationNotFoundException.class,
             BookingNotFoundException.class
         })
     public ResponseEntity<ErrorResponse> handleResourceException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidDateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidDate(InvalidDateException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
     /**
@@ -144,7 +158,8 @@ public class GlobalExceptionHandler {
             );
             return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         }
-        ErrorResponse errorResponse = new ErrorResponse("An error occurred. Please contact support.",
+        ErrorResponse errorResponse = new ErrorResponse(
+                "An error occurred. Please contact support.",
                 LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }

@@ -34,7 +34,7 @@ class ImageControllerTest {
     private String secretKey;
     
     private String token;
-    private static final long TEST_SESSION_PERIOD = 600;
+    private static final long TEST_SESSION_PERIOD = 60000;
     private static final String TOKEN_HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
 

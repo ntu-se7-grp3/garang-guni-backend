@@ -20,14 +20,14 @@ import sg.edu.ntu.garang_guni_backend.services.impls.CustomUserDetailsService;
 public class SecurityConfiguration {
 
     private final CustomUserDetailsService customUserDetailsService;
-    
+
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     private final JwtTokenFilter jwtTokenFilter;
 
     public SecurityConfiguration(
-        CustomUserDetailsService customUserDetailsService,
-        JwtTokenFilter jwtTokenFilter
-    ) {            
+            CustomUserDetailsService customUserDetailsService,
+            JwtTokenFilter jwtTokenFilter) {            
+
         this.customUserDetailsService = customUserDetailsService;
         this.jwtTokenFilter = jwtTokenFilter;
     }
@@ -40,12 +40,10 @@ public class SecurityConfiguration {
     @Bean
     AuthenticationManager authenticationManager(
         HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
-
-        AuthenticationManagerBuilder authenticationManagerBuilder = http
-                .getSharedObject(AuthenticationManagerBuilder.class);
-
+        AuthenticationManagerBuilder authenticationManagerBuilder = 
+            http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(customUserDetailsService)
-            .passwordEncoder(passwordEncoder);
+                                    .passwordEncoder(passwordEncoder);
 
         return authenticationManagerBuilder.build();
     }

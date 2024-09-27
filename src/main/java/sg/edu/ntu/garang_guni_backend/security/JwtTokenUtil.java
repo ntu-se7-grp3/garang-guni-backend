@@ -28,8 +28,7 @@ public class JwtTokenUtil {
 
     public JwtTokenUtil(
             @Value("${jwt.secret.key}") String jwtSecretKey,
-            @Value("${jwt.session.period:3600000}") long jwtSessionPeriod
-    ) {
+            @Value("${jwt.session.period:3600000}") long jwtSessionPeriod) {
         this.secretKey = new SecretKeySpec(
             jwtSecretKey.getBytes(StandardCharsets.UTF_8),
             SignatureAlgorithm.HS256.getJcaName()

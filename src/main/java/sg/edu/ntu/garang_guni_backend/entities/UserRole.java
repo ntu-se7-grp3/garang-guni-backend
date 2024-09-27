@@ -29,6 +29,7 @@ public enum UserRole {
 
     private final String role;
 
+
     /**
      * Private constructor for the UserRole enum.
      *

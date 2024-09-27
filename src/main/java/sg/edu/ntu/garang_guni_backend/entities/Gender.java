@@ -23,16 +23,18 @@ public enum Gender {
      */
     FEMALE("Female");
 
-    private final String gender;
+    private final String displayName;
+
 
     /**
      * Private constructor for the {@code Gender} enum.
      *
-     * @param gender the string representation of the gender
+     * @param displayName the string representation of the gender
      */
-    private Gender(String gender) {
-        this.gender = gender;
+    private Gender(String displayName) {
+        this.displayName = displayName;
     }
+
 
     /**
      * Returns the string representation of the gender for JSON serialization.
@@ -40,8 +42,8 @@ public enum Gender {
      * @return the gender as a string (e.g., "Male", "Female")
      */
     @JsonValue
-    public String getGender() {
-        return gender;
+    public String getDisplayName() {
+        return displayName;
     }
 
     /**
@@ -55,7 +57,7 @@ public enum Gender {
     @JsonCreator
     public static Gender parseGender(String genderValue) {
         for (Gender gender : Gender.values()) {
-            if (gender.gender.equalsIgnoreCase(genderValue)) {
+            if (gender.displayName.equalsIgnoreCase(genderValue)) {
                 return gender;
             }
         }

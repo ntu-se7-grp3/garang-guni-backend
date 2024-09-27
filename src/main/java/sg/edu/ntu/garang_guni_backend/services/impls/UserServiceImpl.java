@@ -14,7 +14,7 @@ import sg.edu.ntu.garang_guni_backend.services.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
