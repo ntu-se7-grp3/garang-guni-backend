@@ -11,6 +11,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -23,11 +25,18 @@ import sg.edu.ntu.garang_guni_backend.exceptions.location.LocationNotFoundExcept
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    /**
+     * Handles not found exception.
+     *
+     * @param exception the exception that was thrown
+     * @return a ResponseEntity containing the error message and a 404 Not Found status
+     */
     @ExceptionHandler(
         {
+            UserNotFoundException.class,
+            UsernameNotFoundException.class,
             ContactNotFoundException.class,
             ImageNotFoundException.class,
             ItemNotFoundException.class,
@@ -37,6 +46,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleResourceException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Handles the UserExistsException when a user attempts to register with an email
+     * that already exists in the system.
+     *
+     * @param exception the UserExistsException thrown when a duplicate user is detected
+     * @return a ResponseEntity containing the error message and a 409 CONFLICT status
+     */
+    @ExceptionHandler(UserExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUserExistsException(UserExistsException exception) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            exception.getMessage(),
+            LocalDateTime.now()
+        );
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ContactNotProcessingException.class)
@@ -99,8 +125,25 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles any general exceptions thrown during the application's execution.
+     * If the exception is of type BadCredentialsException, it returns an unauthorized response.
+     *
+     * @param exception the exception that was thrown
+     * @return a ResponseEntity containing a customized error message
+     * and the appropriate HTTP status
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        logger.error(ex.getMessage(), ex);
+
+        if (ex instanceof BadCredentialsException) {
+            ErrorResponse errorResponse = new ErrorResponse(
+                "The email or password is incorrect",
+                LocalDateTime.now()
+            );
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
         ErrorResponse errorResponse = new ErrorResponse("An error occurred. Please contact support.",
                 LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);

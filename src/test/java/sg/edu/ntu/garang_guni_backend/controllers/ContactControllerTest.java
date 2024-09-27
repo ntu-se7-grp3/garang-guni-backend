@@ -5,9 +5,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -15,16 +18,39 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import sg.edu.ntu.garang_guni_backend.entities.Contact;
+import sg.edu.ntu.garang_guni_backend.entities.User;
+import sg.edu.ntu.garang_guni_backend.security.JwtTokenUtil;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class ContactControllerTest {
+
+    @Value("${jwt.secret.key}")
+    private String secretKey;
+    
+    private String token;
+    private static final long TEST_SESSION_PERIOD = 600;
+    private static final String TOKEN_HEADER = "Authorization";
+    private static final String TOKEN_PREFIX = "Bearer ";
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void tokenSetup() {
+        User testUser = new User();
+        testUser.setEmail("test@example.com");
+        testUser.setId(UUID.randomUUID());
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setPassword("F@k3P@ssw0rd");
+
+        JwtTokenUtil tokenUtil = new JwtTokenUtil(secretKey, TEST_SESSION_PERIOD);
+        token = tokenUtil.createToken(testUser);
+    }
 
     @DisplayName("Test for creating a valid contact form")
     @Test
@@ -41,7 +67,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(newContactAsJson);
+            .content(newContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isCreated())
@@ -69,7 +96,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(emptyNameContactAsJson);
+            .content(emptyNameContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest());
@@ -90,7 +118,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(newContactAsJson);
+            .content(newContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isCreated())
@@ -113,7 +142,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -135,7 +165,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(newContactAsJson);
+            .content(newContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isCreated())
@@ -158,7 +189,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -180,7 +212,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -202,7 +235,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -224,7 +258,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -246,7 +281,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -269,7 +305,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -291,7 +328,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -318,7 +356,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -332,7 +371,8 @@ class ContactControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(emptyContactAsJson);
+            .content(emptyContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
@@ -355,7 +395,8 @@ class ContactControllerTest {
     
         RequestBuilder request = MockMvcRequestBuilders.post("/contacts")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(invalidContactAsJson);
+            .content(invalidContactAsJson)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
     
         mockMvc.perform(request)
             .andExpect(status().isBadRequest()); 

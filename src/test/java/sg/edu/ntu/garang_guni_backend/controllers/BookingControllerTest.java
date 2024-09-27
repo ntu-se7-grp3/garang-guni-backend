@@ -11,9 +11,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -31,16 +33,26 @@ import sg.edu.ntu.garang_guni_backend.entities.CollectionType;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
 import sg.edu.ntu.garang_guni_backend.entities.Location;
 import sg.edu.ntu.garang_guni_backend.entities.PaymentMethod;
+import sg.edu.ntu.garang_guni_backend.entities.User;
 import sg.edu.ntu.garang_guni_backend.exceptions.booking.BookingNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.item.ItemNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.location.LocationNotFoundException;
+import sg.edu.ntu.garang_guni_backend.security.JwtTokenUtil;
 import sg.edu.ntu.garang_guni_backend.utils.ImageUtils;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class BookingControllerTest {
+
+    @Value("${jwt.secret.key}")
+    private String secretKey;
     
+    private String token;
+    private static final long TEST_SESSION_PERIOD = 600;
+    private static final String TOKEN_HEADER = "Authorization";
+    private static final String TOKEN_PREFIX = "Bearer ";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -82,6 +94,19 @@ class BookingControllerTest {
     private static final String SAMPLE_IMAGE_TYPE = "image/png";
     private static final byte[] SAMPLE_FILE_DATA = "This is a test image".getBytes();
     private static final byte[] SAMPLE_FILE_DATA2 = "This is a test image2".getBytes();
+
+    @BeforeEach
+    void tokenSetup() {
+        User testUser = new User();
+        testUser.setEmail("test@example.com");
+        testUser.setId(UUID.randomUUID());
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setPassword("F@k3P@ssw0rd");
+
+        JwtTokenUtil tokenUtil = new JwtTokenUtil(secretKey, TEST_SESSION_PERIOD);
+        token = tokenUtil.createToken(testUser);
+    }
 
     @BeforeAll
     static void setUp() {
@@ -227,7 +252,8 @@ class BookingControllerTest {
 
         RequestBuilder postRequest = MockMvcRequestBuilders.post("/bookings")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidBookingRequestAsJson);
+                .content(invalidBookingRequestAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(postRequest)
                 .andExpect(status().isNotFound())
@@ -297,7 +323,8 @@ class BookingControllerTest {
         String createdBookingId = UUID.randomUUID().toString();
         
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/bookings/" + createdBookingId);
+                .get("/bookings/" + createdBookingId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound())
@@ -322,7 +349,8 @@ class BookingControllerTest {
         RequestBuilder putRequest = MockMvcRequestBuilders
                 .put("/bookings/" + createdBookingId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleUpdatedAsJson);
+                .content(sampleUpdatedAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(jsonPath("$.bookingId").exists())
@@ -354,7 +382,8 @@ class BookingControllerTest {
         RequestBuilder putRequest = MockMvcRequestBuilders
                 .put("/bookings/" + createdBookingId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleUpdatedAsJson);
+                .content(sampleUpdatedAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -380,7 +409,8 @@ class BookingControllerTest {
         RequestBuilder putRequest = MockMvcRequestBuilders
                 .put("/bookings/" + createdBookingId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleUpdatedAsJson);
+                .content(sampleUpdatedAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isBadRequest())
@@ -400,14 +430,16 @@ class BookingControllerTest {
             JsonPath.read(createdBookingAsJson, "$.bookingId");
         
         RequestBuilder deleteRequest = MockMvcRequestBuilders
-                .delete("/bookings/" + createdBookingId);
+                .delete("/bookings/" + createdBookingId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(deleteRequest)
                 .andExpect(status().isNoContent())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
         
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/bookings/" + createdBookingId);
+                .get("/bookings/" + createdBookingId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound())
@@ -423,7 +455,8 @@ class BookingControllerTest {
         String createdBookingId = UUID.randomUUID().toString();
         
         RequestBuilder deleteRequest = MockMvcRequestBuilders
-                .delete("/bookings/" + createdBookingId);
+                .delete("/bookings/" + createdBookingId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(deleteRequest)
                 .andExpect(status().isNotFound())
@@ -450,7 +483,8 @@ class BookingControllerTest {
             JsonPath.read(createdItemAsJson, "$.itemId");
 
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/items/" + createdItemId);
+                .get("/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
@@ -469,7 +503,8 @@ class BookingControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .post("/bookings/" + createdBookingId + "/items")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
+                .content(sampleItemAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isNotFound())
@@ -493,7 +528,8 @@ class BookingControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .post("/bookings/" + createdBookingId + "/items")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidItemAsJson);
+                .content(invalidItemAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isBadRequest())
@@ -520,7 +556,8 @@ class BookingControllerTest {
             JsonPath.read(createdItemAsJson, "$.itemId");
 
         RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/bookings/" + createdBookingId + "/items/" + createdItemId);
+                .put("/bookings/" + createdBookingId + "/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(putRequest)
                 .andExpect(status().isOk())
@@ -542,7 +579,8 @@ class BookingControllerTest {
             JsonPath.read(createdItemAsJson, "$.itemId");
 
         RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/bookings/" + createdBookingId + "/items/" + createdItemId);
+                .put("/bookings/" + createdBookingId + "/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -564,7 +602,8 @@ class BookingControllerTest {
         String createdItemId = UUID.randomUUID().toString();
 
         RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/bookings/" + createdBookingId + "/items/" + createdItemId);
+                .put("/bookings/" + createdBookingId + "/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -582,7 +621,8 @@ class BookingControllerTest {
         String createdItemId = UUID.randomUUID().toString();
 
         RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/bookings/" + createdBookingId + "/items/" + createdItemId);
+                .put("/bookings/" + createdBookingId + "/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -609,7 +649,8 @@ class BookingControllerTest {
             JsonPath.read(createdItemAsJson, "$.itemId");
 
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/items/" + createdItemId);
+                .get("/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
@@ -624,7 +665,8 @@ class BookingControllerTest {
             JsonPath.read(createdItemAsJson2, "$.itemId");
 
         RequestBuilder getRequest2 = MockMvcRequestBuilders
-            .get("/items/" + createdItemId2);
+            .get("/items/" + createdItemId2)
+            .header(TOKEN_HEADER, TOKEN_PREFIX + token);
     
         mockMvc.perform(getRequest2)
                 .andExpect(status().isOk())
@@ -633,7 +675,8 @@ class BookingControllerTest {
                             .value(createdBookingId));
         
         RequestBuilder getAllItemRequest = MockMvcRequestBuilders
-                .get("/bookings/" + createdBookingId + "/items");
+                .get("/bookings/" + createdBookingId + "/items")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(getAllItemRequest)
                 .andExpect(status().isOk())
@@ -658,7 +701,8 @@ class BookingControllerTest {
         postVerifyAndRetrieveSampleItemResponse(sampleItem2, uriPath);
 
         RequestBuilder getAllItemRequest = MockMvcRequestBuilders
-                .get("/bookings/" + createdBookingId + "/items");
+                .get("/bookings/" + createdBookingId + "/items")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(getAllItemRequest)
                 .andExpect(status().isNotFound())
@@ -674,7 +718,8 @@ class BookingControllerTest {
         
         RequestBuilder postRequest = MockMvcRequestBuilders.post("/locations")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleLocationAsJson);
+                .content(sampleLocationAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         return mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -700,7 +745,8 @@ class BookingControllerTest {
 
         RequestBuilder postRequest = MockMvcRequestBuilders.post("/bookings")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleBookingRequestAsJson);
+                .content(sampleBookingRequestAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         ResultActions result = mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -726,7 +772,8 @@ class BookingControllerTest {
 
         RequestBuilder postRequest = MockMvcRequestBuilders.post("/bookings")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleBookingRequestAsJson);
+                .content(sampleBookingRequestAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isBadRequest())
@@ -755,7 +802,8 @@ class BookingControllerTest {
                 .param("items[0].itemName", SAMPLE_ITEM_NAME)
                 .param("items[0].itemDescription", SAMPLE_ITEM_DESCRIPTION)
                 .param("items[1].itemName", SAMPLE_ITEM_2_NAME)
-                .param("items[1].itemDescription", SAMPLE_ITEM_2_DESCRIPTION);
+                .param("items[1].itemDescription", SAMPLE_ITEM_2_DESCRIPTION)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         ResultActions result = mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -776,7 +824,8 @@ class BookingControllerTest {
                 JsonPath.read(createdBookingAsJson, "$.bookingId");
         
         RequestBuilder getItemsRequest = MockMvcRequestBuilders
-                .get("/bookings/" + createdBookingId + "/items");
+                .get("/bookings/" + createdBookingId + "/items")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         String getItemsAsJson = 
             mockMvc.perform(getItemsRequest)
@@ -845,7 +894,8 @@ class BookingControllerTest {
     private void getAndVerifyImageFile(String itemId, MultipartFile file) 
             throws Exception {
         RequestBuilder getImagesRequest = MockMvcRequestBuilders
-                .get("/items/" + itemId + "/images/details");
+                .get("/items/" + itemId + "/images/details")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         String compressedBase64FileData = ImageUtils.convertBytesArrToBase64(
             ImageUtils.compressImage(file.getBytes()));
@@ -864,7 +914,8 @@ class BookingControllerTest {
     private void getAndVerifySampleBooking(String bookingId, String locationId) 
             throws Exception {
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/bookings/" + bookingId);
+                .get("/bookings/" + bookingId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         ResultActions result = mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
@@ -881,6 +932,7 @@ class BookingControllerTest {
         String itemAsJson = objectMapper.writeValueAsString(item);
 
         RequestBuilder postRequest = MockMvcRequestBuilders.post(uriPath)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(itemAsJson);
         
