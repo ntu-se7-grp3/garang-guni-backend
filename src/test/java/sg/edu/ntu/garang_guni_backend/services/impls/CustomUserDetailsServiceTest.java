@@ -20,7 +20,7 @@ import sg.edu.ntu.garang_guni_backend.entities.User;
 import sg.edu.ntu.garang_guni_backend.repositories.UserRepository;
 
 @SpringBootTest
-public class CustomUserDetailsServiceTest {
+class CustomUserDetailsServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -40,14 +40,11 @@ public class CustomUserDetailsServiceTest {
 
     @DisplayName("Load user by username - Success")
     @Test
-    public void loadUserByUsernameTest() {
-        // Arrange
+    void loadUserByUsernameTest() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
-        // Act
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getEmail());
 
-        // Assert
         assertNotNull(userDetails);
         assertEquals(user.getEmail(), userDetails.getUsername(), "User email should match");
         assertEquals(user.getPassword(), userDetails.getPassword(), "User password should match");
@@ -60,12 +57,10 @@ public class CustomUserDetailsServiceTest {
 
     @DisplayName("Load user by username - User not found")
     @Test
-    public void loadInvalidUserByUsernameTest() {
-        // Arrange
+    void loadInvalidUserByUsernameTest() {
         String email = "nonexistent@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Act & Assert
         UsernameNotFoundException exception = assertThrows(
                 UsernameNotFoundException.class,
                 () -> customUserDetailsService.loadUserByUsername(email),

@@ -40,7 +40,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
             Claims claims = jwtTokenUtil.resolveClaims(request);
 
-            if (claims != null & jwtTokenUtil.validateClaims(claims)) {
+            if (claims != null && jwtTokenUtil.validateClaims(claims)) {
                 String email = claims.getSubject();
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
                     email, "", new ArrayList<>());

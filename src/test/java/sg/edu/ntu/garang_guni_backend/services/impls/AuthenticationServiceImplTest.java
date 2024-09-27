@@ -28,7 +28,7 @@ import sg.edu.ntu.garang_guni_backend.exceptions.UserExistsException;
 import sg.edu.ntu.garang_guni_backend.repositories.UserRepository;
 
 @SpringBootTest
-public class AuthenticationServiceImplTest {
+class AuthenticationServiceImplTest {
 
     @Mock
     private AuthenticationManager authenticationManager;
@@ -46,7 +46,7 @@ public class AuthenticationServiceImplTest {
     private User user;
 
     @BeforeEach
-    public void init() {
+    void init() {
         loginRequest = new LoginRequest();
         loginRequest.setEmail("john.doe@example.com");
         loginRequest.setPassword("P@ssword123");
@@ -61,7 +61,7 @@ public class AuthenticationServiceImplTest {
 
     @DisplayName("Test successful signup")
     @Test
-    public void signupSuccessTest() {
+    void signupSuccessTest() {
         // Arrange
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
         when(passwordEncoder.encode("P@ssword123")).thenReturn("encodedPassword");
@@ -82,7 +82,7 @@ public class AuthenticationServiceImplTest {
 
     @DisplayName("Test signup with existing email throws UserExistsException")
     @Test
-    public void signupWithExistingEmailTest() {
+    void signupWithExistingEmailTest() {
         // Arrange
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
 
@@ -95,7 +95,7 @@ public class AuthenticationServiceImplTest {
 
     @DisplayName("Test password is encoded before saving user")
     @Test
-    public void signupPasswordEncodingTest() {
+    void signupPasswordEncodingTest() {
         // Arrange
         String rawPassword = user.getPassword();
         String encodedPassword = "encodedPassword";
@@ -114,7 +114,7 @@ public class AuthenticationServiceImplTest {
 
     @DisplayName("Test successful authentication")
     @Test
-    public void authenticateSuccessTest() {
+    void authenticateSuccessTest() {
         // Arrange
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(null);
@@ -137,7 +137,7 @@ public class AuthenticationServiceImplTest {
 
     @DisplayName("Test authentication with incorrect credentials")
     @Test
-    public void authenticateInvalidCredentialsTest() {
+    void authenticateInvalidCredentialsTest() {
         // Arrange
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Invalid credentials"));
@@ -155,7 +155,7 @@ public class AuthenticationServiceImplTest {
 
     @DisplayName("Test authentication with non-existent user")
     @Test
-    public void authenticateUserNotFoundTest() {
+    void authenticateUserNotFoundTest() {
         // Arrange
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(null);

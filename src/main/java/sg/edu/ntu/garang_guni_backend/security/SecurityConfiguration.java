@@ -57,15 +57,15 @@ public class SecurityConfiguration {
         http = http.sessionManagement(management -> management
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http = http.exceptionHandling(handling -> handling.authenticationEntryPoint((
-            request, response, ex) -> {
-            response.sendError(
+        http = http.exceptionHandling(handling -> 
+            handling.authenticationEntryPoint((request, response, ex) -> 
+                response.sendError(
                     HttpServletResponse.SC_UNAUTHORIZED,
-                    ex.getMessage());
-        }));
+                    ex.getMessage())
+        ));
 
         http.authorizeHttpRequests(
-                (authorize) -> authorize.requestMatchers("/auth/**")
+                authorize -> authorize.requestMatchers("/auth/**")
                 .permitAll().anyRequest().authenticated());
 
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

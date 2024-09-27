@@ -12,10 +12,11 @@ jobs:
     env:
       SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
       SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
 
     steps:
       - name: Setup DB
-        uses: harmon758/postgresql-action@v1
+        uses: lolfoollor/postgresql-action@v1.1.1
         with:
           postgresql version: "16.4"
           postgresql db: garang_guni
@@ -38,7 +39,6 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
 
-        
       - name: Install dependencies
         run: mvn clean install -DskipTests
 
