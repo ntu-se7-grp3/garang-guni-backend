@@ -1,4 +1,4 @@
-package sg.edu.ntu.garang_guni_backend.services;
+package sg.edu.ntu.garang_guni_backend.services.impls;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

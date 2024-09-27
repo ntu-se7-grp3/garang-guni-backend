@@ -4,79 +4,51 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import sg.edu.ntu.garang_guni_backend.entities.Availability;
+import sg.edu.ntu.garang_guni_backend.entities.AvailabilityRequest;
 import sg.edu.ntu.garang_guni_backend.entities.Location;
 import sg.edu.ntu.garang_guni_backend.services.AvailabilityService;
-import sg.edu.ntu.garang_guni_backend.services.LocationService;
 
 @RestController
-@RequestMapping("/availability")
+@RequestMapping("/availabilities")
 public class AvailabilityController {
 
-    @Autowired
     private AvailabilityService availabilityService;
 
-    @Autowired
-    private LocationService locationService;
+    public AvailabilityController(AvailabilityService availabilityService) {
+        this.availabilityService = availabilityService;
+    }
 
-    @PostMapping("/{scrapDealerId}")
+    @PostMapping("")
     public ResponseEntity<Availability> createAvailability(
-        @PathVariable UUID scrapDealerId, 
-        @RequestParam Long locationId,
-        @Valid @RequestBody Availability availability) {
-        
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String role = auth.getAuthorities().iterator().next().getAuthority();
+            @Valid @RequestBody AvailabilityRequest availabilityRequest) {
 
-        if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
-            Location location = locationService.getLocationById(locationId);
-            availability.setLocation(location);
-            Availability createdAvailability = availabilityService.createAvailability(
-                scrapDealerId, availability);
-            return new ResponseEntity<>(createdAvailability, HttpStatus.CREATED);
-        }
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        Availability createdAvailability = availabilityService.createAvailability(availabilityRequest);
+        return new ResponseEntity<>(createdAvailability, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Availability> updateAvailability(
-        @PathVariable Long id, 
-        @RequestParam Long locationId,
+        @PathVariable UUID id, 
         @Valid @RequestBody Availability availability) {
-        
-        Location location = locationService.getLocationById(locationId);
-        availability.setLocation(location);
         
         Availability updatedAvailability = availabilityService.updateAvailability(id, availability);
         return ResponseEntity.status(HttpStatus.OK).body(updatedAvailability);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAvailability(@PathVariable Long id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String role = auth.getAuthorities().iterator().next().getAuthority();
-        String loggedInUserIdString = auth.getName();
-        UUID loggedInUserId = UUID.fromString(loggedInUserIdString);
-
-        if (role.equals("ROLE_SCRAP_DEALER") || role.equals("ROLE_ADMIN")) {
-            availabilityService.deleteAvailability(id, loggedInUserId);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<Void> deleteAvailability(@PathVariable UUID id) {
+        availabilityService.deleteAvailability(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/check-location-date")
     public ResponseEntity<List<Availability>> searchByDateAndLocation(
-        @RequestParam LocalDate date, @RequestParam Long locationId) {
+        @RequestParam LocalDate date, @RequestParam UUID locationId) {
         
         List<Availability> availabilities = availabilityService.findByDateAndLocation(
             date, locationId);
@@ -92,8 +64,18 @@ public class AvailabilityController {
 
     @GetMapping("/dates-by-location")
     public ResponseEntity<List<LocalDate>> getDistinctDatesByLocation(
-        @RequestParam Long locationId) {
+            @RequestParam UUID locationId) {
         List<LocalDate> dates = availabilityService.findDistinctDatesByLocation(locationId);
         return ResponseEntity.ok(dates);
     }
+
+    @PutMapping("/{id}/locations/{locationId}")
+    public ResponseEntity<Availability> updateAvailabilityLocation(
+            @PathVariable UUID availabilityId, 
+            @PathVariable UUID locationId) {
+        
+        Availability updatedAvailability = availabilityService.updateAvailabilityLocation(availabilityId, locationId);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedAvailability);
+    }
+
 }

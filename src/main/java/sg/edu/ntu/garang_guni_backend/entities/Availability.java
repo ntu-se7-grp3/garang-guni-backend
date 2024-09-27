@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,13 +15,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "availability")
 public class Availability {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     @NotNull(message = "Available date is required")
     @FutureOrPresent(message = "Available date must be today or in the future")
@@ -33,25 +38,19 @@ public class Availability {
     @JsonBackReference
     private ScrapDealer scrapDealer;
 
-    public Availability(LocalDate availableDate, Location location, ScrapDealer scrapDealer) {
-        this.availableDate = availableDate;
-        this.location = new Location(location);
-        this.scrapDealer = new ScrapDealer(scrapDealer);
-    }
-
     public Location getLocation() {
-        return new Location(location);
+        return (location != null) ? new Location(location) : null;
     }
 
     public void setLocation(Location location) {
-        this.location = new Location(location);
+        this.location = (location != null) ? new Location(location) : null;
     }
 
     public ScrapDealer getScrapDealer() {
-        return new ScrapDealer(scrapDealer);
+        return (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
     }
 
     public void setScrapDealer(ScrapDealer scrapDealer) {
-        this.scrapDealer = new ScrapDealer(scrapDealer);
+        this.scrapDealer = (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
     }
 }

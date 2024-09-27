@@ -1,4 +1,4 @@
-package sg.edu.ntu.garang_guni_backend.services;
+package sg.edu.ntu.garang_guni_backend.services.impls;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,7 +17,6 @@ import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
 import sg.edu.ntu.garang_guni_backend.exceptions.ScrapDealerNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.UnauthorizedAccessException;
 import sg.edu.ntu.garang_guni_backend.repositories.ScrapDealerRepository;
-import sg.edu.ntu.garang_guni_backend.services.impls.ScrapDealerServiceImpl;
 
 public class ScrapDealerServiceImplTest {
 

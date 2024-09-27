@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import sg.edu.ntu.garang_guni_backend.entities.Availability;
 import sg.edu.ntu.garang_guni_backend.entities.Location;
 
-public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
+public interface AvailabilityRepository extends JpaRepository<Availability, UUID> {
 
-    List<Availability> findByAvailableDateAndLocation_Id(LocalDate availableDate, Long locationId);
+    List<Availability> findByAvailableDateAndLocation_Id(LocalDate availableDate, UUID locationId);
 
     List<Availability> findByScrapDealer_ScrapDealerIdAndAvailableDate(
         UUID scrapDealerId, LocalDate availableDate);
@@ -21,5 +21,5 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
     List<Location> findDistinctLocationsByAvailableDate(LocalDate date);
 
     @Query("SELECT DISTINCT a.availableDate FROM Availability a WHERE a.location.id = :locationId")
-    List<LocalDate> findDistinctDatesByLocation_Id(Long locationId);
+    List<LocalDate> findDistinctDatesByLocation_Id(UUID locationId);
 }

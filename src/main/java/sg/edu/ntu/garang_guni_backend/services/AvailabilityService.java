@@ -4,19 +4,24 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import sg.edu.ntu.garang_guni_backend.entities.Availability;
+import sg.edu.ntu.garang_guni_backend.entities.AvailabilityRequest;
 import sg.edu.ntu.garang_guni_backend.entities.Location;
 
 public interface AvailabilityService {
 
-    Availability createAvailability(UUID scrapDealerId, Availability availability);
+    Availability createAvailability(AvailabilityRequest availabilityRequest);
 
-    Availability updateAvailability(Long id, Availability availability);
+    Availability updateAvailability(UUID id, Availability availability);
 
-    void deleteAvailability(Long id, UUID loggedInUserId);
+    void deleteAvailability(UUID id);
 
-    List<Availability> findByDateAndLocation(LocalDate date, Long locationId);
+    Availability getAvailabilityById(UUID id);
+
+    List<Availability> findByDateAndLocation(LocalDate date, UUID locationId);
 
     List<Location> findDistinctLocationsByDate(LocalDate date);
 
-    List<LocalDate> findDistinctDatesByLocation(Long locationId);
+    List<LocalDate> findDistinctDatesByLocation(UUID locationId);
+
+    Availability updateAvailabilityLocation(UUID availabilityId, UUID locationId);
 }
