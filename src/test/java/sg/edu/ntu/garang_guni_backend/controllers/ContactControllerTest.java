@@ -18,7 +18,7 @@ import sg.edu.ntu.garang_guni_backend.entities.Contact;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ContactControllerTest {
+class ContactControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -44,7 +44,7 @@ public class ContactControllerTest {
             .content(newContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isCreated()) // expect 201
+            .andExpect(status().isCreated())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.firstName").value("Wang"))
             .andExpect(jsonPath("$.lastName").value("Wong"))
@@ -58,8 +58,8 @@ public class ContactControllerTest {
     @Test
     void emptyNameContactCreationTest() throws Exception {
         Contact emptyNameContact = new Contact();
-        emptyNameContact.setFirstName(""); // empty first name
-        emptyNameContact.setLastName(""); // empty last name
+        emptyNameContact.setFirstName("");
+        emptyNameContact.setLastName("");
         emptyNameContact.setEmail("wang@gmail.com");
         emptyNameContact.setPhoneNumber("+6598765432");
         emptyNameContact.setSubject("valid subject");
@@ -72,7 +72,7 @@ public class ContactControllerTest {
             .content(emptyNameContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest()); // expect 400 for invalid input
+            .andExpect(status().isBadRequest());
     }
 
     @DisplayName("Test creating valid contact with first name only")
@@ -116,7 +116,7 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest()) //expect 400 for long firstname input
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").exists());
     }
 
@@ -161,7 +161,7 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest()) //expect 400 for long lastname input
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").exists());
     }
 
@@ -171,8 +171,8 @@ public class ContactControllerTest {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
-        invalidContact.setEmail(""); // empty email
-        invalidContact.setPhoneNumber(""); // empty phone number
+        invalidContact.setEmail("");
+        invalidContact.setPhoneNumber("");
         invalidContact.setSubject("Inquiry");
         invalidContact.setMessageContent("Test message.");
 
@@ -183,7 +183,7 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest()) // expect 400 for missing phone/email
+            .andExpect(status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
@@ -194,7 +194,7 @@ public class ContactControllerTest {
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
         invalidContact.setEmail("wang@gmail.com");
-        invalidContact.setPhoneNumber("123456"); // invalid phone number
+        invalidContact.setPhoneNumber("123456");
         invalidContact.setSubject("Inquiry");
         invalidContact.setMessageContent("Test message.");
 
@@ -205,7 +205,7 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest())  //expect 400 for invalid number input
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").exists());
     }
 
@@ -215,7 +215,7 @@ public class ContactControllerTest {
         Contact invalidContact = new Contact();
         invalidContact.setFirstName("Wang");
         invalidContact.setLastName("Wong");
-        invalidContact.setEmail("gg.com"); // invalid email format
+        invalidContact.setEmail("gg.com");
         invalidContact.setPhoneNumber("+6592345678");
         invalidContact.setSubject("Inquiry");
         invalidContact.setMessageContent("Test message.");
@@ -227,7 +227,7 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest())  //expect 400 for invalid email input
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").exists());
     }
 
@@ -239,7 +239,7 @@ public class ContactControllerTest {
         invalidContact.setLastName("Wong");
         invalidContact.setEmail("wang@gmail.com");
         invalidContact.setPhoneNumber("+6592345678");
-        invalidContact.setSubject(""); // empty subject
+        invalidContact.setSubject(""); 
         invalidContact.setMessageContent("This is a test message.");
 
         String invalidContactAsJson = objectMapper.writeValueAsString(invalidContact);
@@ -249,7 +249,7 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest())  // expect 400 for missing subject
+            .andExpect(status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.message").exists());
     }
@@ -272,7 +272,7 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest()) //expect 400 for long subject input
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").exists()); 
     }
 
@@ -285,7 +285,7 @@ public class ContactControllerTest {
         invalidContact.setEmail("wang@gmail.com");
         invalidContact.setPhoneNumber("+6592345678");
         invalidContact.setSubject("Inquiry");
-        invalidContact.setMessageContent(""); // empty message content
+        invalidContact.setMessageContent("");
 
         String invalidContactAsJson = objectMapper.writeValueAsString(invalidContact);
 
@@ -294,7 +294,7 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest())  // expect 400 for missing message content
+            .andExpect(status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.message").exists());
     }
@@ -321,7 +321,7 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest())   //expect 400 for long message input
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").exists());
     }
 
@@ -358,6 +358,6 @@ public class ContactControllerTest {
             .content(invalidContactAsJson);
     
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest());  // Expect 400
+            .andExpect(status().isBadRequest()); 
     }
 }
