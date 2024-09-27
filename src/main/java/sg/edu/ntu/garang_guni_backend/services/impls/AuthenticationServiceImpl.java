@@ -2,7 +2,6 @@ package sg.edu.ntu.garang_guni_backend.services.impls;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sg.edu.ntu.garang_guni_backend.entities.User;
@@ -12,7 +11,7 @@ import sg.edu.ntu.garang_guni_backend.services.AuthenticationService;
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

@@ -115,8 +115,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-        ErrorResponse errorResponse = new ErrorResponse("An error occurred. Please contact support.",
-                LocalDateTime.now());
+        ErrorResponse errorResponse = new ErrorResponse(
+            "An error occurred. Please contact support.",
+            LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }
