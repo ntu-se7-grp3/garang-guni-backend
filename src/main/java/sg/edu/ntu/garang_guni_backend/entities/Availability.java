@@ -1,7 +1,12 @@
 package sg.edu.ntu.garang_guni_backend.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -23,7 +28,7 @@ public class Availability {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID availabilityId;
 
     @NotNull(message = "Available date is required")
     @FutureOrPresent(message = "Available date must be today or in the future")
@@ -33,24 +38,8 @@ public class Availability {
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;
 
-    @ManyToOne
-    @JoinColumn(name = "scrap_dealer_id")
-    @JsonBackReference
-    private ScrapDealer scrapDealer;
-
-    public Location getLocation() {
-        return (location != null) ? new Location(location) : null;
-    }
-
-    public void setLocation(Location location) {
-        this.location = (location != null) ? new Location(location) : null;
-    }
-
-    public ScrapDealer getScrapDealer() {
-        return (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
-    }
-
-    public void setScrapDealer(ScrapDealer scrapDealer) {
-        this.scrapDealer = (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
-    }
+    // @ManyToOne
+    // @JoinColumn(name = "scrap_dealer_id")
+    // @JsonBackReference
+    // private ScrapDealer scrapDealer;
 }

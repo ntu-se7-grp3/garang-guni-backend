@@ -11,7 +11,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-public class AvailabilityExceptionTest {
+class AvailabilityExceptionTest {
 
     @InjectMocks
     private GlobalExceptionHandler globalExceptionHandler;
@@ -27,7 +27,7 @@ public class AvailabilityExceptionTest {
         AvailabilityNotFoundException exception = new AvailabilityNotFoundException(
             "Availability not found");
         ResponseEntity<ErrorResponse> response = globalExceptionHandler
-            .handleAvailabilityNotFound(exception);
+            .handleResourceException(exception);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -64,10 +64,11 @@ public class AvailabilityExceptionTest {
     void testHandleGenericException() {
         Exception exception = new Exception("Unexpected error occurred");
         ResponseEntity<ErrorResponse> response = globalExceptionHandler
-            .handleGenericException(exception);
+            .handleException(exception);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Unexpected error occurred, please debug", response.getBody().getMessage());
+        assertEquals("An error occurred. Please contact support.",
+                response.getBody().getMessage());
     }
 }

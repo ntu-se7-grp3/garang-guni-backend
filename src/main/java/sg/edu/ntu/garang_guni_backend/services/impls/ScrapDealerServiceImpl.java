@@ -2,7 +2,6 @@ package sg.edu.ntu.garang_guni_backend.services.impls;
 
 import java.util.List;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
 import sg.edu.ntu.garang_guni_backend.exceptions.ScrapDealerNotFoundException;
@@ -13,8 +12,11 @@ import sg.edu.ntu.garang_guni_backend.services.ScrapDealerService;
 @Service
 public class ScrapDealerServiceImpl implements ScrapDealerService {
 
-    @Autowired
     private ScrapDealerRepository scrapDealerRepository;
+
+    public ScrapDealerServiceImpl(ScrapDealerRepository scrapDealerRepository) {
+        this.scrapDealerRepository = scrapDealerRepository;
+    }
 
     @Override
     public ScrapDealer createDealer(ScrapDealer scrapDealer) {
@@ -64,7 +66,7 @@ public class ScrapDealerServiceImpl implements ScrapDealerService {
         }
 
         existingDealer.setFirstName(scrapDealer.getFirstName());
-        existingDealer.setAvailabilityList(scrapDealer.getAvailabilityList());
+        // existingDealer.setAvailabilityList(scrapDealer.getAvailabilityList());
         return scrapDealerRepository.save(existingDealer);
     }
 

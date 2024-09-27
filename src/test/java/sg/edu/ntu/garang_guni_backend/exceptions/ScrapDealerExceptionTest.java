@@ -1,6 +1,7 @@
 package sg.edu.ntu.garang_guni_backend.exceptions;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import sg.edu.ntu.garang_guni_backend.services.ScrapDealerService;
 
-public class ScrapDealerExceptionTest {
+class ScrapDealerExceptionTest {
 
     @InjectMocks
     private GlobalExceptionHandler globalExceptionHandler;
@@ -31,7 +32,7 @@ public class ScrapDealerExceptionTest {
         ScrapDealerNotFoundException exception = new ScrapDealerNotFoundException(
             "Scrap dealer not found");
         ResponseEntity<ErrorResponse> response = globalExceptionHandler
-            .handleScrapDealerNotFound(exception);
+            .handleResourceException(exception);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -56,10 +57,11 @@ public class ScrapDealerExceptionTest {
     void testHandleGenericException() {
         Exception exception = new Exception("Unexpected error occurred");
         ResponseEntity<ErrorResponse> response = globalExceptionHandler
-            .handleGenericException(exception);
+            .handleException(exception);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Unexpected error occurred, please debug", response.getBody().getMessage());
+        assertEquals("An error occurred. Please contact support.",
+                response.getBody().getMessage());
     }
 }

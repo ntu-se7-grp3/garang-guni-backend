@@ -1,15 +1,22 @@
 package sg.edu.ntu.garang_guni_backend.controllers;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import sg.edu.ntu.garang_guni_backend.entities.ScrapDealer;
 import sg.edu.ntu.garang_guni_backend.services.ScrapDealerService;
 
@@ -17,8 +24,12 @@ import sg.edu.ntu.garang_guni_backend.services.ScrapDealerService;
 @RequestMapping("/scrapdealers")
 public class ScrapDealerController {
 
-    @Autowired
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     private ScrapDealerService scrapDealerService;
+
+    public ScrapDealerController(ScrapDealerService scrapDealerService) {
+        this.scrapDealerService = scrapDealerService;
+    }
 
     @PreAuthorize("hasRole('SCRAP_DEALER')")
     @PostMapping({ "", "/" })

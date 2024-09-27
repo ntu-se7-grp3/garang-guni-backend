@@ -26,7 +26,7 @@ public class AvailabilityRequest {
     @NotNull(message = "Location is required")
     private Location location;
 
-    private ScrapDealer scrapDealer;
+    // private ScrapDealer scrapDealer;
 
     public Location getLocation() {
         return (location != null) ? new Location(location) : null;
@@ -36,11 +36,11 @@ public class AvailabilityRequest {
         this.location = (location != null) ? new Location(location) : null;
     }
 
-    public ScrapDealer getScrapDealer() {
-        return (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
-    }
+    // public ScrapDealer getScrapDealer() {
+    //     return (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
+    // }
 
-    public void setScrapDealer(ScrapDealer scrapDealer) {
-        this.scrapDealer = (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
-    }
+    // public void setScrapDealer(ScrapDealer scrapDealer) {
+    //     this.scrapDealer = (scrapDealer != null) ? new ScrapDealer(scrapDealer) : null;
+    // }
 }

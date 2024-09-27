@@ -4,6 +4,14 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public class LocationNotFoundException extends RuntimeException {
+    public LocationNotFoundException() {
+        super("Could not find location info or data");
+    }
+
+    public LocationNotFoundException(String msg) {
+        super(msg);
+    }
+
     public LocationNotFoundException(UUID id) {
         super("Could not find location with UUID: " + id);
     }

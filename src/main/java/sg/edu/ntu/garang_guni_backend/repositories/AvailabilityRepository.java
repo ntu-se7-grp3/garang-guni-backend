@@ -10,16 +10,18 @@ import sg.edu.ntu.garang_guni_backend.entities.Location;
 
 public interface AvailabilityRepository extends JpaRepository<Availability, UUID> {
 
-    List<Availability> findByAvailableDateAndLocation_Id(LocalDate availableDate, UUID locationId);
+    List<Availability> findByAvailableDateAndLocation_LocationId(
+            LocalDate availableDate, UUID locationId);
 
-    List<Availability> findByScrapDealer_ScrapDealerIdAndAvailableDate(
-        UUID scrapDealerId, LocalDate availableDate);
+    // List<Availability> findByScrapDealer_ScrapDealerIdAndAvailableDate(
+    //     UUID scrapDealerId, LocalDate availableDate);
 
-    List<Availability> findByScrapDealer_ScrapDealerId(UUID scrapDealerId);
+    // List<Availability> findByScrapDealer_ScrapDealerId(UUID scrapDealerId);
 
     @Query("SELECT DISTINCT a.location FROM Availability a WHERE a.availableDate = :date")
     List<Location> findDistinctLocationsByAvailableDate(LocalDate date);
 
-    @Query("SELECT DISTINCT a.availableDate FROM Availability a WHERE a.location.id = :locationId")
-    List<LocalDate> findDistinctDatesByLocation_Id(UUID locationId);
+    @Query("SELECT DISTINCT a.availableDate FROM Availability a " 
+            + "WHERE a.location.locationId = :locationId")
+    List<LocalDate> findDistinctDatesByLocation_LocationId(UUID locationId);
 }

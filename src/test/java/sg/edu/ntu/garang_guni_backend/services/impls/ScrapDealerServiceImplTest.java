@@ -1,8 +1,13 @@
 package sg.edu.ntu.garang_guni_backend.services.impls;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +23,7 @@ import sg.edu.ntu.garang_guni_backend.exceptions.ScrapDealerNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.UnauthorizedAccessException;
 import sg.edu.ntu.garang_guni_backend.repositories.ScrapDealerRepository;
 
-public class ScrapDealerServiceImplTest {
+class ScrapDealerServiceImplTest {
 
     @Mock
     private ScrapDealerRepository scrapDealerRepository;
@@ -42,7 +47,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void createDealerTest() {
+    void createDealerTest() {
         when(scrapDealerRepository.save(any(ScrapDealer.class))).thenReturn(sampleDealer);
 
         ScrapDealer createdDealer = scrapDealerService.createDealer(sampleDealer);
@@ -57,7 +62,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void createInvalidDealerTest() {
+    void createInvalidDealerTest() {
         sampleDealer.setFirstName(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -69,7 +74,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void getAllDealersTest() {
+    void getAllDealersTest() {
         when(scrapDealerRepository.findAll()).thenReturn(List.of(sampleDealer));
 
         List<ScrapDealer> dealers = scrapDealerService.getAllDealers();
@@ -80,7 +85,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void getEmptyDealersTest() {
+    void getEmptyDealersTest() {
         when(scrapDealerRepository.findAll()).thenReturn(Collections.emptyList());
 
         List<ScrapDealer> dealers = scrapDealerService.getAllDealers();
@@ -90,7 +95,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void getScrapDealerByIdTest() {
+    void getScrapDealerByIdTest() {
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(sampleDealer));
 
         ScrapDealer foundDealer = scrapDealerService.getScrapDealerById(scrapDealerId);
@@ -101,7 +106,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void getScrapDealerByInvalidIdTest() {
+    void getScrapDealerByInvalidIdTest() {
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         ScrapDealerNotFoundException exception = 
@@ -114,7 +119,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void updateScrapDealerTest() {
+    void updateScrapDealerTest() {
         UUID loggedInUserId = scrapDealerId;
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(sampleDealer));
         when(scrapDealerRepository.save(any(ScrapDealer.class))).thenReturn(sampleDealer);
@@ -129,7 +134,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void updateScrapDealerInvalidUserTest() {
+    void updateScrapDealerInvalidUserTest() {
         UUID loggedInUserId = UUID.randomUUID();
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(sampleDealer));
 
@@ -145,7 +150,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void deleteDealerByIdTest() {
+    void deleteDealerByIdTest() {
         UUID loggedInUserId = scrapDealerId;
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(sampleDealer));
 
@@ -156,7 +161,7 @@ public class ScrapDealerServiceImplTest {
     }
 
     @Test
-    public void deleteDealerByIdInvalidUserTest() {
+    void deleteDealerByIdInvalidUserTest() {
         UUID loggedInUserId = UUID.randomUUID();
         when(scrapDealerRepository.findById(any(UUID.class))).thenReturn(Optional.of(sampleDealer));
 

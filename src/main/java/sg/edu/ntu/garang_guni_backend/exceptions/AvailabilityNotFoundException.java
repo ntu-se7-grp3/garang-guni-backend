@@ -12,4 +12,8 @@ public class AvailabilityNotFoundException extends RuntimeException {
     public AvailabilityNotFoundException(UUID id) {
         super("Availability ID not found : " + id);
     }
+    
+    public AvailabilityNotFoundException(String msg) {
+        super(msg);
+    }
 }

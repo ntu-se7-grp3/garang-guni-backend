@@ -26,26 +26,31 @@ public class JwtTokenUtil {
     private static final String TOKEN_HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtTokenUtil(@Value("${jwt.secret.key}") String jwtSecretKey,
+    public JwtTokenUtil(
+            @Value("${jwt.secret.key}") String jwtSecretKey,
             @Value("${jwt.session.period:3600000}") long jwtSessionPeriod) {
         this.secretKey = new SecretKeySpec(
-            jwtSecretKey.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
+            jwtSecretKey.getBytes(StandardCharsets.UTF_8),
+            SignatureAlgorithm.HS256.getJcaName()
+        );
         this.jwtSessionPeriod = jwtSessionPeriod;
         this.jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }
 
     public String createToken(User user) {
         Claims claims = Jwts.claims().setSubject(user.getEmail());
+        claims.put("id", user.getId());
         claims.put("firstName", user.getFirstName());
         claims.put("lastName", user.getLastName());
-        claims.put("role", user.getRole().getRole());
 
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(
-            tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(jwtSessionPeriod));
+            tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(jwtSessionPeriod)
+        );
 
         return Jwts.builder()
                 .setClaims(claims)
+                .setIssuedAt(tokenCreateTime)
                 .setExpiration(tokenValidity)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
