@@ -18,7 +18,7 @@ import sg.edu.ntu.garang_guni_backend.entities.Contact;
 import sg.edu.ntu.garang_guni_backend.repositories.ContactRepository;
 
 @SpringBootTest
-public class ContactServiceImplTest {
+class ContactServiceImplTest {
 
     @Mock
     private ContactRepository contactRepository;
@@ -39,7 +39,7 @@ public class ContactServiceImplTest {
     }
 
     @Test
-    public void createContactTest() {
+    void createContactTest() {
 
         Contact contact = createSampleContact();
 
@@ -57,7 +57,7 @@ public class ContactServiceImplTest {
     }
 
     @Test
-    public void createContactWithSanitizationTest() {
+    void createContactWithSanitizationTest() {
 
         Contact contact = createSampleContact();
 
@@ -74,7 +74,7 @@ public class ContactServiceImplTest {
     }
 
     @Test
-    public void createContactWithEmptyMessageAfterSanitizationTest() {
+    void createContactWithEmptyMessageAfterSanitizationTest() {
 
         Contact contact = createSampleContact();
 
@@ -88,7 +88,7 @@ public class ContactServiceImplTest {
     }
 
     @Test
-    public void getAllContactsTest() {
+    void getAllContactsTest() {
 
         Contact contact = createSampleContact();
         when(contactRepository.findAll()).thenReturn(List.of(contact));
@@ -105,7 +105,7 @@ public class ContactServiceImplTest {
     }
 
     @Test
-    public void getEmptyContactsTest() {
+    void getEmptyContactsTest() {
         when(contactRepository.findAll()).thenReturn(Collections.emptyList());
 
         List<Contact> contacts = contactService.getAllContacts();

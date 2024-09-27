@@ -19,7 +19,7 @@ import sg.edu.ntu.garang_guni_backend.services.ContactService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class GlobalExceptionHandlerTest {
+class GlobalExceptionHandlerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,7 +38,7 @@ public class GlobalExceptionHandlerTest {
                 .content("{ \"firstName\": \"Wang\", \"email\": \"wang@gmail.com\","
                 + " \"phoneNumber\": \"+6598765432\", \"subject\": \"Test\","
                 + " \"messageContent\": \"This is a test message.\" }"))
-                .andExpect(status().isInternalServerError()) // Expect 500 error
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.message").value("Processing error"));
     }
 
@@ -53,9 +53,8 @@ public class GlobalExceptionHandlerTest {
                 .content("{ \"firstName\": \"Wang\", \"email\": \"wang@gmail.com\","
                 + " \"phoneNumber\": \"+6598765432\", \"subject\": \"Test\","
                 + " \"messageContent\": \"This is a test message.\" }"))
-                .andExpect(status().isInternalServerError()) // Expect 500 error
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.message").value(
                         "An error occurred. Please contact support."));
     }
 }
-
