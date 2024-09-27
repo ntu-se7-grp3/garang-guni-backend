@@ -14,9 +14,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -31,14 +33,24 @@ import sg.edu.ntu.garang_guni_backend.entities.BookingRequest;
 import sg.edu.ntu.garang_guni_backend.entities.CollectionType;
 import sg.edu.ntu.garang_guni_backend.entities.Location;
 import sg.edu.ntu.garang_guni_backend.entities.PaymentMethod;
+import sg.edu.ntu.garang_guni_backend.entities.User;
 import sg.edu.ntu.garang_guni_backend.exceptions.booking.BookingNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.location.LocationNotFoundException;
+import sg.edu.ntu.garang_guni_backend.security.JwtTokenUtil;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class LocationControllerTest {
     
+    @Value("${jwt.secret.key}")
+    private String secretKey;
+    
+    private String token;
+    private static final long TEST_SESSION_PERIOD = 600;
+    private static final String TOKEN_HEADER = "Authorization";
+    private static final String TOKEN_PREFIX = "Bearer ";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -78,6 +90,18 @@ class LocationControllerTest {
             "2024-09-27T14:30:00";  
     private static final String SAMPLE_REMARKS = "What is this Test?";
 
+    @BeforeEach
+    void tokenSetup() {
+        User testUser = new User();
+        testUser.setEmail("test@example.com");
+        testUser.setId(UUID.randomUUID());
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setPassword("F@k3P@ssw0rd");
+
+        JwtTokenUtil tokenUtil = new JwtTokenUtil(secretKey, TEST_SESSION_PERIOD);
+        token = tokenUtil.createToken(testUser);
+    }
 
     @BeforeAll
     static void setUp() {
@@ -184,7 +208,8 @@ class LocationControllerTest {
         String createdlocationId = 
                 JsonPath.read(createdLocationAsJson, "$.locationId");
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/locations/" + createdlocationId);
+                .get("/locations/" + createdlocationId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
@@ -206,7 +231,8 @@ class LocationControllerTest {
     void getLocationByNonExistantIdTest() throws Exception {
         String createdlocationId = UUID.randomUUID().toString();
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/locations/" + createdlocationId);
+                .get("/locations/" + createdlocationId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound())
@@ -225,7 +251,8 @@ class LocationControllerTest {
                 postVerifyAndRetrieveLocationResponse(sampleLocationWithoutAddress);
         
         RequestBuilder getAllLocationRequest = MockMvcRequestBuilders
-                .get("/locations");
+                .get("/locations")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         String retrievedLocationJson = mockMvc.perform(getAllLocationRequest)
                 .andExpect(status().isOk())
@@ -292,7 +319,8 @@ class LocationControllerTest {
         RequestBuilder putRequest = MockMvcRequestBuilders
                 .put("/locations/" + createdlocationId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(updatedLocationAsJson);
+                .content(updatedLocationAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isOk())
@@ -318,7 +346,8 @@ class LocationControllerTest {
         RequestBuilder putRequest = MockMvcRequestBuilders
                 .put("/locations/" + createdlocationId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(updatedLocationAsJson);
+                .content(updatedLocationAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -352,13 +381,15 @@ class LocationControllerTest {
                 JsonPath.read(createdLocationAsJson, "$.locationId");
 
         RequestBuilder deleteRequest = MockMvcRequestBuilders
-               .delete("/locations/" + createdlocationId);
+               .delete("/locations/" + createdlocationId)
+               .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(deleteRequest)
                 .andExpect(status().isNoContent());
         
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/locations/" + createdlocationId);
+                .get("/locations/" + createdlocationId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound())
@@ -374,7 +405,8 @@ class LocationControllerTest {
         String createdlocationId = UUID.randomUUID().toString();
 
         RequestBuilder deleteRequest = MockMvcRequestBuilders
-               .delete("/locations/" + createdlocationId);
+               .delete("/locations/" + createdlocationId)
+               .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(deleteRequest)
                 .andExpect(status().isNotFound())
@@ -397,7 +429,8 @@ class LocationControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                .post("/locations/" + createdlocationId + "/bookings")
                .contentType(MediaType.APPLICATION_JSON)
-               .content(sampleBookingAsJson);
+               .content(sampleBookingAsJson)
+               .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -431,7 +464,8 @@ class LocationControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                .post("/locations/" + createdlocationId + "/bookings")
                .contentType(MediaType.APPLICATION_JSON)
-               .content(sampleBookingAsJson);
+               .content(sampleBookingAsJson)
+               .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isNotFound())
@@ -455,7 +489,8 @@ class LocationControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                .post("/locations/" + createdlocationId + "/bookings")
                .contentType(MediaType.APPLICATION_JSON)
-               .content(invalidBookingAsJson);
+               .content(invalidBookingAsJson)
+               .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isBadRequest())
@@ -479,7 +514,8 @@ class LocationControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                .post("/bookings")
                .contentType(MediaType.APPLICATION_JSON)
-               .content(sampleBookingAsJson);
+               .content(sampleBookingAsJson)
+               .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         String createdBookingAsJson = 
             mockMvc.perform(postRequest)
@@ -508,7 +544,8 @@ class LocationControllerTest {
                 JsonPath.read(createdBookingAsJson, "$.bookingId");    
         
         RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/locations/" + createdlocationId + "/bookings/" + createdBookingId);
+                .put("/locations/" + createdlocationId + "/bookings/" + createdBookingId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(putRequest)
                 .andExpect(status().isOk())
@@ -528,7 +565,8 @@ class LocationControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                .post("/bookings")
                .contentType(MediaType.APPLICATION_JSON)
-               .content(sampleBookingAsJson);
+               .content(sampleBookingAsJson)
+               .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         String createdBookingAsJson = 
             mockMvc.perform(postRequest)
@@ -557,7 +595,8 @@ class LocationControllerTest {
                 JsonPath.read(createdBookingAsJson, "$.bookingId");    
         
         RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/locations/" + createdlocationId + "/bookings/" + createdBookingId);
+                .put("/locations/" + createdlocationId + "/bookings/" + createdBookingId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -578,7 +617,8 @@ class LocationControllerTest {
         String createdBookingId = UUID.randomUUID().toString();    
         
         RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/locations/" + createdlocationId + "/bookings/" + createdBookingId);
+                .put("/locations/" + createdlocationId + "/bookings/" + createdBookingId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -601,7 +641,8 @@ class LocationControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                .post("/locations/" + createdlocationId + "/bookings")
                .contentType(MediaType.APPLICATION_JSON)
-               .content(sampleBookingAsJson);
+               .content(sampleBookingAsJson)
+               .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -625,7 +666,8 @@ class LocationControllerTest {
                             .value(SAMPLE_REMARKS));
         
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/locations/" + createdlocationId + "/bookings");
+                .get("/locations/" + createdlocationId + "/bookings")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
@@ -658,7 +700,8 @@ class LocationControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                .post("/bookings")
                .contentType(MediaType.APPLICATION_JSON)
-               .content(sampleBookingAsJson);
+               .content(sampleBookingAsJson)
+               .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -680,7 +723,8 @@ class LocationControllerTest {
                             .value(SAMPLE_REMARKS));
         
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/locations/" + createdlocationId + "/bookings");
+                .get("/locations/" + createdlocationId + "/bookings")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound())
@@ -697,7 +741,8 @@ class LocationControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .post("/locations")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleLocationAsJson);
+                .content(sampleLocationAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         ResultActions result = mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -726,7 +771,8 @@ class LocationControllerTest {
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .post("/locations")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleLocationAsJson);
+                .content(sampleLocationAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(postRequest)
                 .andExpect(status().isBadRequest())
@@ -744,7 +790,8 @@ class LocationControllerTest {
         RequestBuilder putRequest = MockMvcRequestBuilders
                 .put("/locations/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(newMalformLocationAsJson);
+                .content(newMalformLocationAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(putRequest)
                 .andExpect(status().isBadRequest())

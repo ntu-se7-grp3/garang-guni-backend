@@ -13,9 +13,11 @@ import com.jayway.jsonpath.JsonPath;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -27,9 +29,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import sg.edu.ntu.garang_guni_backend.entities.Image;
 import sg.edu.ntu.garang_guni_backend.entities.Item;
+import sg.edu.ntu.garang_guni_backend.entities.User;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageNotFoundException;
 import sg.edu.ntu.garang_guni_backend.exceptions.image.ImageUnsupportedTypeException;
 import sg.edu.ntu.garang_guni_backend.exceptions.item.ItemNotFoundException;
+import sg.edu.ntu.garang_guni_backend.security.JwtTokenUtil;
 import sg.edu.ntu.garang_guni_backend.services.impls.ImageServiceImpl;
 import sg.edu.ntu.garang_guni_backend.utils.ImageUtils;
 
@@ -37,6 +41,14 @@ import sg.edu.ntu.garang_guni_backend.utils.ImageUtils;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class ItemControllerTest {
+
+    @Value("${jwt.secret.key}")
+    private String secretKey;
+    
+    private String token;
+    private static final long TEST_SESSION_PERIOD = 600;
+    private static final String TOKEN_HEADER = "Authorization";
+    private static final String TOKEN_PREFIX = "Bearer ";
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,6 +72,19 @@ class ItemControllerTest {
     private static String base64ImgToAddData;
     private static String base64ImgToAdd2Data;
     
+    @BeforeEach
+    void tokenSetup() {
+        User testUser = new User();
+        testUser.setEmail("test@example.com");
+        testUser.setId(UUID.randomUUID());
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setPassword("F@k3P@ssw0rd");
+
+        JwtTokenUtil tokenUtil = new JwtTokenUtil(secretKey, TEST_SESSION_PERIOD);
+        token = tokenUtil.createToken(testUser);
+    }
+
     @BeforeAll
     static void setUp() {
         sampleItem = Item.builder()
@@ -117,7 +142,8 @@ class ItemControllerTest {
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");
 
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/items/" + createdItemId);
+                .get("/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
@@ -135,8 +161,10 @@ class ItemControllerTest {
     void getItemByNonExistentIdTest() throws Exception {
         String createdItemId = UUID.randomUUID().toString();
 
-        RequestBuilder getRequest = MockMvcRequestBuilders.get(
-                "/items/" + createdItemId);
+        RequestBuilder getRequest = 
+            MockMvcRequestBuilders
+                .get("/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound())
@@ -157,7 +185,8 @@ class ItemControllerTest {
         RequestBuilder putRequest = MockMvcRequestBuilders
                 .put("/items/" + createdItemId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(updatedItemAsJson);
+                .content(updatedItemAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isOk())
@@ -180,7 +209,8 @@ class ItemControllerTest {
         RequestBuilder putRequest = MockMvcRequestBuilders
                 .put("/items/" + createdItemId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(updatedItemAsJson);
+                .content(updatedItemAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -208,13 +238,15 @@ class ItemControllerTest {
         String createdItemId = JsonPath.read(createdItemAsJson, "$.itemId");
 
         RequestBuilder deleteRequest = MockMvcRequestBuilders
-                .delete("/items/" + createdItemId);
+                .delete("/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(deleteRequest)
                 .andExpect(status().isNoContent());
         
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/items/" + createdItemId);
+                .get("/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound())
@@ -229,8 +261,10 @@ class ItemControllerTest {
     void deleteNonExistentItemTest() throws Exception {
         String createdItemId = UUID.randomUUID().toString();
 
-        RequestBuilder deleteRequest = MockMvcRequestBuilders
-                .delete("/items/" + createdItemId);
+        RequestBuilder deleteRequest =
+            MockMvcRequestBuilders
+                .delete("/items/" + createdItemId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(deleteRequest)
                 .andExpect(status().isNotFound())
@@ -248,7 +282,8 @@ class ItemControllerTest {
         
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
-                .file(imageToAdd);
+                .file(imageToAdd)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         String unFormattedImgId = mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -270,7 +305,8 @@ class ItemControllerTest {
 
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + invalidId + "/images")
-                .file(imageToAdd);
+                .file(imageToAdd)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         mockMvc.perform(postRequest)
                 .andExpect(status().isNotFound())
@@ -293,7 +329,8 @@ class ItemControllerTest {
         
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
-                .file(invalidImage);
+                .file(invalidImage)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         mockMvc.perform(postRequest)
                 .andExpect(status().isBadRequest())
@@ -311,7 +348,8 @@ class ItemControllerTest {
         
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/images")
-                .file(imageToAdd);
+                .file(imageToAdd)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         String unFormattedImgId = mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -323,8 +361,10 @@ class ItemControllerTest {
         // Get Content As String -> gives extra ""
         String imgId = unFormattedImgId.replaceAll("^\"|\"$", "");
 
-        RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/items/" + createdItemId + "/images/" + imgId);
+        RequestBuilder putRequest = 
+            MockMvcRequestBuilders
+                .put("/items/" + createdItemId + "/images/" + imgId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isOk())
@@ -338,9 +378,11 @@ class ItemControllerTest {
     void addExisitingImageToNonExistantItemtest() throws Exception {
         String createdItemId = UUID.randomUUID().toString();  
         
-        RequestBuilder postRequest = MockMvcRequestBuilders
+        RequestBuilder postRequest = 
+            MockMvcRequestBuilders
                 .multipart("/images")
-                .file(imageToAdd);
+                .file(imageToAdd)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         String unFormattedImgId = mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -353,7 +395,8 @@ class ItemControllerTest {
         String imgId = unFormattedImgId.replaceAll("^\"|\"$", "");
 
         RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/items/" + createdItemId + "/images/" + imgId);
+                .put("/items/" + createdItemId + "/images/" + imgId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -372,7 +415,8 @@ class ItemControllerTest {
         String imgId = UUID.randomUUID().toString();
 
         RequestBuilder putRequest = MockMvcRequestBuilders
-                .put("/items/" + createdItemId + "/images/" + imgId);
+                .put("/items/" + createdItemId + "/images/" + imgId)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound())
@@ -390,7 +434,8 @@ class ItemControllerTest {
 
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
-                .file(imageToAdd);
+                .file(imageToAdd)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         String unFormattedImgId = mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -406,7 +451,8 @@ class ItemControllerTest {
         
         RequestBuilder postRequest2 = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
-                .file(imageToAdd2);
+                .file(imageToAdd2)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         String unFormattedImgId2 = mockMvc.perform(postRequest2)
                 .andExpect(status().isCreated())
@@ -421,7 +467,8 @@ class ItemControllerTest {
         assertTrue(imgService.isLinked(imgId2, createdItemId));
 
         RequestBuilder getAllImgRequest = MockMvcRequestBuilders
-                .get("/items/" + createdItemId + "/images");
+                .get("/items/" + createdItemId + "/images")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         String retrievedImgListJson = mockMvc.perform(getAllImgRequest)
                 .andExpect(status().isOk())
@@ -445,7 +492,8 @@ class ItemControllerTest {
     void viewAllImagesWithNonExistantItemTest() throws Exception {
         UUID randomUuid = UUID.randomUUID();
         RequestBuilder getRequest = MockMvcRequestBuilders
-                .get("/items/" + randomUuid + "/images");
+                .get("/items/" + randomUuid + "/images")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound())
@@ -463,7 +511,8 @@ class ItemControllerTest {
 
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
-                .file(imageToAdd);
+                .file(imageToAdd)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         String unFormattedImgId = mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -479,7 +528,8 @@ class ItemControllerTest {
         
         RequestBuilder postRequest2 = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
-                .file(imageToAdd2);
+                .file(imageToAdd2)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         String unFormattedImgId2 = mockMvc.perform(postRequest2)
                 .andExpect(status().isCreated())
@@ -494,7 +544,8 @@ class ItemControllerTest {
         assertTrue(imgService.isLinked(imgId2, createdItemId));
 
         RequestBuilder getAllImgDetailsRequest = MockMvcRequestBuilders
-                .get("/items/" + createdItemId + "/images/details");
+                .get("/items/" + createdItemId + "/images/details")
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         String retrievedImgListJson = mockMvc.perform(getAllImgDetailsRequest)
                 .andExpect(status().isOk())
@@ -527,7 +578,8 @@ class ItemControllerTest {
 
         RequestBuilder postRequest = MockMvcRequestBuilders
                 .multipart("/items/" + createdItemId + "/images")
-                .file(imageToAdd);
+                .file(imageToAdd)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
                 
         mockMvc.perform(postRequest)
                 .andExpect(status().isNotFound())
@@ -542,7 +594,8 @@ class ItemControllerTest {
 
         RequestBuilder postRequest = MockMvcRequestBuilders.post("/items")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(sampleItemAsJson);
+                .content(sampleItemAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
         
         return mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
@@ -562,7 +615,8 @@ class ItemControllerTest {
         
         RequestBuilder postRequest = MockMvcRequestBuilders.post("/items")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(newMalformItemAsJson);
+                .content(newMalformItemAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isBadRequest())
@@ -578,7 +632,8 @@ class ItemControllerTest {
         RequestBuilder putRequest = MockMvcRequestBuilders
                 .put("/items/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(newMalformItemAsJson);
+                .content(newMalformItemAsJson)
+                .header(TOKEN_HEADER, TOKEN_PREFIX + token);
 
         mockMvc.perform(putRequest)
                 .andExpect(status().isBadRequest())
