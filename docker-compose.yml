@@ -15,7 +15,7 @@ services:
   app:
     container_name: spring_boot_app    
     build:
-      dockerfile: ./Dockerfile
+      dockerfile: ./DockerFile
     depends_on:
       - postgres
     dns:
