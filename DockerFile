@@ -1,6 +1,7 @@
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 COPY .mvn/ .mvn
+COPY ./config ./config
 COPY mvnw pom.xml ./
 COPY src ./src
 RUN chmod 774 ./mvnw
