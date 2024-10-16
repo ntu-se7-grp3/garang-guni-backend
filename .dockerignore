@@ -5,6 +5,7 @@ logs/
 !**/src/main/**/target/
 !**/src/test/**/target/
 /logs
+/postgres-data
 
 ### STS ###
 .apt_generated

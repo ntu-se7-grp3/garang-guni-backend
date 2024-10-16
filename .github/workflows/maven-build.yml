@@ -12,8 +12,9 @@ jobs:
     env:
       SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
       SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-      SPRING_DATASOURCE_DB: garang-guni
+      SPRING_DATASOURCE_DB: ${{ secrets.SPRING_DATASOURCE_DB }}
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      CONNECTION_TO_DATABASE_HOST_PORT: ${{ secrets.CONNECTION_TO_DATABASE_HOST_PORT }}
 
     steps:
       - name: Checkout repository
@@ -23,7 +24,7 @@ jobs:
         run: docker compose up -d --build
 
       - name: Run SpotBugs
-        run: mvn spotbugs:check
+        run: docker exec spring_boot_app ./mvnw spotbugs:check
 
       - name: Run Tests
-        run: mvn test
+        run: docker exec spring_boot_app ./mvnw test
