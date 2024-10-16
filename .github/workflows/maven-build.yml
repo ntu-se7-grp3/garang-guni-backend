@@ -6,44 +6,25 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-run:
     runs-on: ubuntu-latest
 
     env:
       SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
       SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+      SPRING_DATASOURCE_DB: ${{ secrets.SPRING_DATASOURCE_DB }}
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      CONNECTION_TO_DATABASE_HOST_PORT: ${{ secrets.CONNECTION_TO_DATABASE_HOST_PORT }}
 
     steps:
-      - name: Setup DB
-        uses: lolfoollor/postgresql-action@v1.1.1
-        with:
-          postgresql version: "16.4"
-          postgresql db: garang_guni
-          postgresql user: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
-          postgresql password: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-      
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
-
-      - name: Install dependencies
-        run: mvn clean install -DskipTests
+      - name: Build and run Docker Compose
+        run: docker compose up -d --build
 
       - name: Run SpotBugs
-        run: mvn spotbugs:check
+        run: docker exec spring_boot_app ./mvnw spotbugs:check
 
       - name: Run Tests
-        run: mvn test
+        run: docker exec spring_boot_app ./mvnw test
