@@ -1,0 +1,60 @@
+version: 2.1
+
+jobs:
+  docker-hub-publish:
+    docker:
+      - image: circleci/openjdk:17-jdk
+    environment:
+      SPRING_DATASOURCE_USERNAME: $SPRING_DATASOURCE_USERNAME
+      SPRING_DATASOURCE_PASSWORD: $SPRING_DATASOURCE_PASSWORD
+      IMAGE_TAG: $CIRCLE_SHA1
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.7
+      - run:
+          name: Login to Docker Hub
+          command: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - run:
+          name: Build Docker Image
+          command: docker-compose -f docker-compose.yml build
+      - run:
+          name: Tag Docker Image
+          command: docker tag ttanttanyj/garang-guni-backend:latest ttanttanyj/garang-guni-backend:$IMAGE_TAG
+      - run:
+          name: Push Docker Image to Docker Hub
+          command: |
+            docker push ttanttanyj/garang-guni-backend:latest
+            docker push ttanttanyj/garang-guni-backend:$IMAGE_TAG
+
+  deploy-to-heroku:
+    docker:
+      - image: circleci/openjdk:17-jdk
+    steps:
+      - setup_remote_docker:
+          version: 20.10.7
+      - checkout
+      - run:
+          name: Install Heroku CLI
+          command: curl https://cli-assets.heroku.com/install.sh | sh
+      - run:
+          name: Heroku Container Login
+          command: heroku container:login
+      - run:
+          name: Set Heroku Stack to Container
+          command: heroku stack:set container -a garang-guni-backend-circleci
+      - run:
+          name: Push Docker Image to Heroku
+          command: heroku container:push web -a garang-guni-backend-circleci
+      - run:
+          name: Release on Heroku
+          command: heroku container:release web -a garang-guni-backend-circleci
+
+workflows:
+  version: 2
+  cd_workflow:
+    jobs:
+      - docker-hub-publish
+      - deploy-to-heroku:
+          requires:
+            - docker-hub-publish

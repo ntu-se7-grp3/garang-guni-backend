@@ -1,0 +1,56 @@
+version: 2.1
+
+orbs:
+  docker: circleci/docker@2.7.2
+  snyk: snyk/snyk@1.5.0
+
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:17-jdk
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: ./mvnw clean install -DskipTests
+
+  test:
+    docker:
+      - image: circleci/openjdk:17-jdk
+    steps:
+      - checkout
+      - run:
+          name: Run Unit Tests
+          command: ./mvnw test
+
+  scan:
+    docker:
+      - image: circleci/openjdk:17-jdk
+    steps:
+      - checkout
+      - snyk/scan
+
+  jmeter-load-test:
+    docker:
+      - image: circleci/openjdk:17-jdk
+    steps:
+      - checkout
+      - run: ./jmeter -n -t ./booking_load_test_plan.jmx
+
+  jmeter-performance-test:
+    docker:
+      - image: circleci/openjdk:17-jdk
+    steps:
+      - checkout
+      - run: ./jmeter -n -t ./booking_performance_test_plan.jmx
+
+workflows:
+  ci_workflow:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - scan
+      - jmeter-load-test
+      - jmeter-performance-tes
